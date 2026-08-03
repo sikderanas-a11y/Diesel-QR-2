@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Forklift Diesel Tracker</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --green:#1a7a3c;
+    --green-dark:#125c2c;
+    --green-light:#e8f7ee;
+    --red:#c0392b;
+    --yellow:#e0a800;
+    --bg:#f5f7f6;
+    --text:#1c1c1c;
+    --muted:#6b7280;
+    --border:#d9e2dc;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{max-width:480px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;}
+  header{
+    background:var(--green);
+    color:#fff;
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;top:0;z-index:50;
+  }
+  header h1{font-size:18px;font-weight:600;}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px;}
+  .logout-btn{
+    background:rgba(255,255,255,.15);
+    color:#fff;border:none;padding:8px 14px;border-radius:8px;
+    font-size:13px;font-weight:600;cursor:pointer;
+  }
+  main{flex:1;padding:20px;}
+  .card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px;
+  }
+  .field input{
+    width:100%;padding:14px;border:1.5px solid var(--border);border-radius:10px;
+    font-size:16px;background:#fafafa;
+  }
+  .field input:focus{outline:none;border-color:var(--green);background:#fff;}
+  .btn{
+    width:100%;padding:15px;border:none;border-radius:10px;
+    font-size:16px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-primary{background:var(--green);color:#fff;}
+  .btn-primary:active{background:var(--green-dark);}
+  .btn-secondary{background:var(--green-light);color:var(--green-dark);margin-top:10px;}
+  .btn-outline{background:#fff;border:1.5px solid var(--green);color:var(--green);margin-top:10px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .hidden{display:none !important;}
+  .center-logo{
+    text-align:center;padding:30px 0 10px;
+  }
+  .center-logo .icon{
+    width:64px;height:64px;background:var(--green-light);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
+    font-size:32px;
+  }
+  .center-logo h2{font-size:20px;color:var(--green-dark);}
+  .center-logo p{font-size:13px;color:var(--muted);margin-top:4px;}
+  #qr-reader{
+    width:100%;border-radius:12px;overflow:hidden;border:2px solid var(--green);
+  }
+  .scan-status{
+    text-align:center;padding:12px;color:var(--muted);font-size:14px;
+  }
+  .vehicle-card{
+    background:var(--green-light);
+    border:1px solid var(--green);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .vehicle-card h2{color:var(--green-dark);font-size:22px;margin-bottom:2px;}
+  .vehicle-card .code-tag{
+    display:inline-block;background:var(--green);color:#fff;font-size:12px;
+    font-weight:700;padding:3px 10px;border-radius:6px;margin-top:6px;
+  }
+  .info-row{
+    display:flex;justify-content:space-between;padding:10px 0;
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .info-row:last-child{border-bottom:none;}
+  .info-row .label{font-size:13px;color:var(--muted);}
+  .info-row .value{font-size:14px;font-weight:600;text-align:right;}
+  .status-badge{
+    display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;
+  }
+  .status-recent{background:#e6f7ec;color:var(--green-dark);}
+  .status-moderate{background:#fff6dd;color:#8a6600;}
+  .status-delayed{background:#fdeceb;color:var(--red);}
+  .error-msg{
+    background:#fdeceb;color:var(--red);padding:12px 14px;border-radius:10px;
+    font-size:14px;margin-bottom:14px;font-weight:600;
+  }
+  .success-box{
+    text-align:center;padding:10px 0 20px;
+  }
+  .success-box .icon{
+    width:70px;height:70px;background:var(--green-light);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;margin:10px auto 16px;
+    font-size:36px;color:var(--green);
+  }
+  .success-box h2{color:var(--green-dark);font-size:19px;margin-bottom:16px;}
+  .manual-toggle{
+    text-align:center;font-size:13px;color:var(--green);font-weight:600;
+    margin-top:12px;cursor:pointer;text-decoration:underline;
+  }
+  .loading{
+    text-align:center;padding:30px 0;color:var(--muted);
+  }
+  .section-title{font-size:14px;font-weight:700;color:var(--green-dark);margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Forklift Diesel Tracker</h1>
+      <div class="sub" id="headerSub">Field Operations</div>
+    </div>
+    <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
+  </header>
+
+  <main>
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div id="loginScreen">
+      <div class="center-logo">
+        <div class="icon">🚜</div>
+        <h2>Operator Login</h2>
+        <p>Enter your details to start recording diesel entries</p>
+      </div>
+      <div class="card">
+        <div id="loginError"></div>
+        <div class="field">
+          <label>Operator Name</label>
+          <input type="text" id="loginName" placeholder="Enter your full name" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Mobile Number</label>
+          <input type="tel" id="loginMobile" placeholder="e.g. 017XXXXXXXX" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Login</button>
+      </div>
+    </div>
+
+    <!-- ================= SCAN SCREEN ================= -->
+    <div id="scanScreen" class="hidden">
+      <div class="card">
+        <div class="section-title">Scan Forklift QR Code</div>
+        <div id="qr-reader"></div>
+        <div class="scan-status" id="scanStatus">Point camera at the QR code</div>
+        <div class="manual-toggle" onclick="toggleManual()">Enter code manually instead</div>
+        <div id="manualEntry" class="hidden" style="margin-top:14px;">
+          <div class="field">
+            <label>Vehicle Code</label>
+            <input type="text" id="manualCode" placeholder="e.g. DF01" autocomplete="off" style="text-transform:uppercase;">
+          </div>
+          <button class="btn btn-outline" onclick="submitManualCode()">Lookup Vehicle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= LOADING ================= -->
+    <div id="loadingScreen" class="hidden">
+      <div class="loading">Loading vehicle data...</div>
+    </div>
+
+    <!-- ================= VEHICLE INFO + ENTRY FORM ================= -->
+    <div id="vehicleScreen" class="hidden">
+      <div class="vehicle-card">
+        <h2 id="vVehicleName">-</h2>
+        <div class="code-tag" id="vCode">-</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Last Consumption</div>
+        <div class="info-row">
+          <div class="label">Date &amp; Time</div>
+          <div class="value" id="vLastDateTime">No previous record</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Quantity</div>
+          <div class="value" id="vLastQuantity">-</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Meter Reading</div>
+          <div class="value" id="vLastMeter">-</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Time Since Last</div>
+          <div class="value" id="vTimeSince">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Diesel Entry</div>
+        <div id="entryError"></div>
+        <div class="field">
+          <label>Quantity (LTR)</label>
+          <input type="number" id="entryQuantity" placeholder="e.g. 25" inputmode="decimal" min="0">
+        </div>
+        <div class="field">
+          <label>Vehicle Meter Reading</label>
+          <input type="number" id="entryMeter" placeholder="e.g. 4580" inputmode="decimal" min="0">
+        </div>
+        <button class="btn btn-primary" id="saveBtn" onclick="submitEntry()">Save Diesel Entry</button>
+        <button class="btn btn-outline" onclick="cancelToScan()">Cancel / Scan Different Vehicle</button>
+      </div>
+    </div>
+
+    <!-- ================= SUCCESS SCREEN ================= -->
+    <div id="successScreen" class="hidden">
+      <div class="card success-box">
+        <div class="icon">✓</div>
+        <h2>Diesel Entry Saved Successfully</h2>
+        <div class="info-row"><div class="label">Vehicle</div><div class="value" id="sVehicle">-</div></div>
+        <div class="info-row"><div class="label">Diesel</div><div class="value" id="sQuantity">-</div></div>
+        <div class="info-row"><div class="label">Meter Reading</div><div class="value" id="sMeter">-</div></div>
+        <div class="info-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
+        <div class="info-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Forklift</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ============ SUPABASE CONFIGURATION ============ */
+/* Replace these two values with your own project's values.        */
+/* Dashboard -> Project Settings -> API                             */
+const SUPABASE_URL = "https://oshqaazzteqqukilghev.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zaHFhYXp6dGVxcXVraWxnaGV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzc4ODYsImV4cCI6MjEwMTMxMzg4Nn0.Rz33PdqBlq9yWqgNiz_4B_2fG6B3ztpk3dTx44He4F0";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ============ STATE ============ */
+let currentVehicle = null; // { code, vehicle, datetime, quantity, meterReading }
+let html5QrCode = null;
+let scanLocked = false;
+
+/* ============ INIT ============ */
+document.addEventListener("DOMContentLoaded", () => {
+  const op = getOperator();
+  if (op) {
+    showLoggedInHeader(op);
+    showScreen("scan");
+    startScanner();
+  } else {
+    showScreen("login");
+  }
+});
+
+/* ============ LOCAL STORAGE HELPERS ============ */
+/* Still fine to keep the operator's own session in localStorage -   */
+/* this is just "who is using this phone right now", not the data.  */
+function getOperator() {
+  const raw = localStorage.getItem("operator");
+  return raw ? JSON.parse(raw) : null;
+}
+function setOperator(name, mobile) {
+  localStorage.setItem("operator", JSON.stringify({ name, mobile }));
+}
+function clearOperator() {
+  localStorage.removeItem("operator");
+}
+
+/* ============ SCREEN MANAGEMENT ============ */
+function showScreen(name) {
+  const screens = ["login", "scan", "loading", "vehicle", "success"];
+  screens.forEach(s => {
+    const el = document.getElementById(s + "Screen");
+    if (el) el.classList.toggle("hidden", s !== name);
+  });
+  document.getElementById("logoutBtn").classList.toggle("hidden", name === "login");
+}
+
+function showLoggedInHeader(op) {
+  document.getElementById("headerSub").textContent = "Logged in: " + op.name;
+}
+
+/* ============ LOGIN ============ */
+async function handleLogin() {
+  const name = document.getElementById("loginName").value.trim();
+  const mobile = document.getElementById("loginMobile").value.trim();
+  const errorBox = document.getElementById("loginError");
+  errorBox.innerHTML = "";
+
+  if (!name) { showError(errorBox, "Please enter your name."); return; }
+  if (!mobile) { showError(errorBox, "Please enter your mobile number."); return; }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+
+  try {
+    // Check if operator already exists by mobile number
+    const { data: existing, error: selectErr } = await sb
+      .from("operator_login")
+      .select("name, mobile")
+      .eq("mobile", mobile)
+      .maybeSingle();
+
+    if (selectErr) throw selectErr;
+
+    let finalName = name, finalMobile = mobile;
+
+    if (existing) {
+      finalName = existing.name;
+      finalMobile = existing.mobile;
+    } else {
+      const { error: insertErr } = await sb
+        .from("operator_login")
+        .insert({ name: name, mobile: mobile });
+      if (insertErr) throw insertErr;
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Login";
+    setOperator(finalName, finalMobile);
+    showLoggedInHeader({ name: finalName, mobile: finalMobile });
+    showScreen("scan");
+    startScanner();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Login";
+    showError(errorBox, "Network error. Please try again.");
+    console.error(err);
+  }
+}
+
+function logout() {
+  clearOperator();
+  stopScanner();
+  currentVehicle = null;
+  document.getElementById("loginName").value = "";
+  document.getElementById("loginMobile").value = "";
+  showScreen("login");
+}
+
+function showError(box, msg) {
+  box.innerHTML = '<div class="error-msg">' + escapeHtml(msg) + '</div>';
+}
+
+/* ============ QR SCANNER ============ */
+function startScanner() {
+  scanLocked = false;
+  document.getElementById("scanStatus").textContent = "Point camera at the QR code";
+  const readerEl = document.getElementById("qr-reader");
+  readerEl.innerHTML = "";
+
+  html5QrCode = new Html5Qrcode("qr-reader");
+  const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    config,
+    (decodedText) => {
+      if (scanLocked) return;
+      scanLocked = true;
+      document.getElementById("scanStatus").textContent = "Code detected: " + decodedText;
+      stopScanner();
+      lookupVehicle(decodedText.trim());
+    },
+    () => { /* ignore per-frame scan errors */ }
+  ).catch(() => {
+    document.getElementById("scanStatus").textContent = "Camera not available. Use manual entry below.";
+  });
+}
+
+function stopScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => {
+      html5QrCode.clear();
+    }).catch(() => {});
+  }
+}
+
+function toggleManual() {
+  document.getElementById("manualEntry").classList.toggle("hidden");
+}
+
+function submitManualCode() {
+  const code = document.getElementById("manualCode").value.trim();
+  if (!code) return;
+  stopScanner();
+  lookupVehicle(code);
+}
+
+/* ============ VEHICLE LOOKUP ============ */
+async function lookupVehicle(code) {
+  showScreen("loading");
+  const upperCode = code.toUpperCase();
+
+  try {
+    const { data: vehicle, error: vErr } = await sb
+      .from("master")
+      .select("code, vehicle_name")
+      .ilike("code", upperCode)
+      .maybeSingle();
+
+    if (vErr) throw vErr;
+    if (!vehicle) {
+      alert("Vehicle not found for code: " + code);
+      cancelToScan();
+      return;
+    }
+
+    const { data: lastEntry, error: eErr } = await sb
+      .from("diesel_data")
+      .select("entry_datetime, quantity, meter_reading")
+      .ilike("code", upperCode)
+      .order("entry_datetime", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (eErr) throw eErr;
+
+    currentVehicle = {
+      code: vehicle.code,
+      vehicle: vehicle.vehicle_name,
+      datetime: lastEntry ? lastEntry.entry_datetime : null,
+      quantity: lastEntry ? lastEntry.quantity : null,
+      meterReading: lastEntry ? lastEntry.meter_reading : null
+    };
+
+    renderVehicleInfo(currentVehicle);
+    showScreen("vehicle");
+  } catch (err) {
+    alert("Network error while looking up vehicle. Please try again.");
+    console.error(err);
+    cancelToScan();
+  }
+}
+
+function renderVehicleInfo(data) {
+  document.getElementById("vVehicleName").textContent = data.vehicle;
+  document.getElementById("vCode").textContent = data.code;
+
+  if (data.datetime) {
+    const dt = new Date(data.datetime);
+    document.getElementById("vLastDateTime").textContent = formatDateTime(dt);
+    document.getElementById("vLastQuantity").textContent = data.quantity + " LTR";
+    document.getElementById("vLastMeter").textContent = data.meterReading;
+
+    const diffMs = new Date() - dt;
+    const { text, statusClass, statusLabel } = timeSince(diffMs);
+    document.getElementById("vTimeSince").innerHTML =
+      text + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span>';
+  } else {
+    document.getElementById("vLastDateTime").textContent = "No previous record";
+    document.getElementById("vLastQuantity").textContent = "-";
+    document.getElementById("vLastMeter").textContent = "-";
+    document.getElementById("vTimeSince").textContent = "-";
+  }
+
+  document.getElementById("entryQuantity").value = "";
+  document.getElementById("entryMeter").value = "";
+  document.getElementById("entryError").innerHTML = "";
+}
+
+function formatDateTime(dt) {
+  const options = { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true };
+  return dt.toLocaleString("en-GB", options);
+}
+
+function timeSince(diffMs) {
+  const hours = diffMs / (1000 * 60 * 60);
+  const days = Math.floor(hours / 24);
+  const remHours = Math.floor(hours % 24);
+  const text = days + " day" + (days !== 1 ? "s" : "") + " " + remHours + " hour" + (remHours !== 1 ? "s" : "");
+
+  let statusClass, statusLabel;
+  if (hours < 24) {
+    statusClass = "status-recent"; statusLabel = "🟢 Recent";
+  } else if (hours <= 48) {
+    statusClass = "status-moderate"; statusLabel = "🟡 Moderate";
+  } else {
+    statusClass = "status-delayed"; statusLabel = "🔴 Delayed";
+  }
+  return { text, statusClass, statusLabel };
+}
+
+/* ============ SUBMIT DIESEL ENTRY ============ */
+async function submitEntry() {
+  const errorBox = document.getElementById("entryError");
+  errorBox.innerHTML = "";
+
+  const quantity = parseFloat(document.getElementById("entryQuantity").value);
+  const meterReading = parseFloat(document.getElementById("entryMeter").value);
+  const op = getOperator();
+
+  if (!op) { showError(errorBox, "Session expired. Please log in again."); logout(); return; }
+  if (!currentVehicle) { showError(errorBox, "No vehicle selected."); return; }
+  if (isNaN(quantity) || quantity <= 0) { showError(errorBox, "Please enter a valid diesel quantity."); return; }
+  if (isNaN(meterReading) || meterReading < 0) { showError(errorBox, "Please enter a valid meter reading."); return; }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  try {
+    const { data, error } = await sb
+      .from("diesel_data")
+      .insert({
+        code: currentVehicle.code,
+        vehicle_name: currentVehicle.vehicle,
+        quantity: quantity,
+        meter_reading: meterReading,
+        operator_name: op.name,
+        operator_mobile: op.mobile
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    btn.disabled = false;
+    btn.textContent = "Save Diesel Entry";
+    document.getElementById("sVehicle").textContent = data.vehicle_name;
+    document.getElementById("sQuantity").textContent = data.quantity + " LTR";
+    document.getElementById("sMeter").textContent = data.meter_reading;
+    document.getElementById("sOperator").textContent = data.operator_name;
+    showScreen("success");
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Save Diesel Entry";
+    showError(errorBox, "Network error. Please try again.");
+    console.error(err);
+  }
+}
+
+/* ============ NAVIGATION ============ */
+function cancelToScan() {
+  currentVehicle = null;
+  document.getElementById("manualCode").value = "";
+  document.getElementById("manualEntry").classList.add("hidden");
+  showScreen("scan");
+  startScanner();
+}
+
+/* ============ UTIL ============ */
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
