@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Forklift Diesel Tracker</title>
+<title>Diesel Tracker</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
@@ -140,7 +140,7 @@
 <div class="app">
   <header>
     <div>
-      <h1>Forklift Diesel Tracker</h1>
+      <h1>Diesel Tracker</h1>
       <div class="sub" id="headerSub">Field Operations</div>
     </div>
     <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
@@ -172,7 +172,7 @@
     <!-- ================= SCAN SCREEN ================= -->
     <div id="scanScreen" class="hidden">
       <div class="card">
-        <div class="section-title">Scan Forklift QR Code</div>
+        <div class="section-title">Scan QR Code</div>
         <div id="qr-reader"></div>
         <div class="scan-status" id="scanStatus">Point camera at the QR code</div>
         <div class="manual-toggle" onclick="toggleManual()">Enter code manually instead</div>
@@ -244,7 +244,7 @@
         <div class="info-row"><div class="label">Meter Reading</div><div class="value" id="sMeter">-</div></div>
         <div class="info-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
         <div class="info-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Forklift</button>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Vehicle</button>
       </div>
     </div>
 
