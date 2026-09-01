@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Diesel Tracker</title>
+<title>Forklift Diesel Tracker</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
@@ -61,6 +61,18 @@
     font-size:16px;background:#fafafa;
   }
   .field input:focus{outline:none;border-color:var(--green);background:#fff;}
+  .suggestion-list{
+    position:absolute;top:100%;left:0;right:0;z-index:60;
+    background:#fff;border:1.5px solid var(--green);border-top:none;
+    border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+  }
+  .suggestion-list .sug-item{
+    padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid #f0f0f0;
+  }
+  .suggestion-list .sug-item:last-child{border-bottom:none;}
+  .suggestion-list .sug-item:active,.suggestion-list .sug-item:hover{background:var(--green-light);}
+  .suggestion-list .sug-item .sug-sub{display:block;font-size:12px;color:var(--muted);margin-top:2px;}
   .btn{
     width:100%;padding:15px;border:none;border-radius:10px;
     font-size:16px;font-weight:700;cursor:pointer;
@@ -140,7 +152,7 @@
 <div class="app">
   <header>
     <div>
-      <h1>Diesel Tracker</h1>
+      <h1>Forklift Diesel Tracker</h1>
       <div class="sub" id="headerSub">Field Operations</div>
     </div>
     <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
@@ -172,14 +184,20 @@
     <!-- ================= SCAN SCREEN ================= -->
     <div id="scanScreen" class="hidden">
       <div class="card">
-        <div class="section-title">Scan QR Code</div>
+        <div class="section-title">
+          <span>Scan Forklift QR Code</span>
+        </div>
         <div id="qr-reader"></div>
-        <div class="scan-status" id="scanStatus">Point camera at the QR code</div>
+        <div id="startCameraWrap" style="text-align:center;padding:20px 0;">
+          <button class="btn btn-primary" style="width:auto;padding:14px 28px;" onclick="startScanner()">📷 Start Camera</button>
+        </div>
+        <div class="scan-status" id="scanStatus"></div>
         <div class="manual-toggle" onclick="toggleManual()">Enter code manually instead</div>
         <div id="manualEntry" class="hidden" style="margin-top:14px;">
-          <div class="field">
+          <div class="field" style="position:relative;">
             <label>Vehicle Code</label>
             <input type="text" id="manualCode" placeholder="e.g. DF01" autocomplete="off" style="text-transform:uppercase;">
+            <div id="manualCodeSuggestions" class="suggestion-list hidden"></div>
           </div>
           <button class="btn btn-outline" onclick="submitManualCode()">Lookup Vehicle</button>
         </div>
@@ -199,7 +217,9 @@
       </div>
 
       <div class="card">
-        <div class="section-title">Last Consumption</div>
+        <div class="section-title">
+          <span>Last Consumption</span>
+        </div>
         <div class="info-row">
           <div class="label">Date &amp; Time</div>
           <div class="value" id="vLastDateTime">No previous record</div>
@@ -213,8 +233,20 @@
           <div class="value" id="vLastMeter">-</div>
         </div>
         <div class="info-row">
+          <div class="label">Consumption Rate/Day</div>
+          <div class="value" id="vConsumptionRate">-</div>
+        </div>
+        <div class="info-row">
           <div class="label">Time Since Last</div>
           <div class="value" id="vTimeSince">-</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Driver</div>
+          <div class="value" id="vDutyDriver">-</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Location</div>
+          <div class="value" id="vDutyLocation">-</div>
         </div>
       </div>
 
@@ -228,6 +260,16 @@
         <div class="field">
           <label>Vehicle Meter Reading</label>
           <input type="number" id="entryMeter" placeholder="e.g. 4580" inputmode="decimal" min="0">
+        </div>
+        <div class="field" style="position:relative;">
+          <label>Driver ID / Mobile Number</label>
+          <input type="text" id="driverLookup" placeholder="e.g. DR-1025 or 017XXXXXXXX" autocomplete="off">
+          <div id="driverSuggestions" class="suggestion-list hidden"></div>
+          <div id="driverStatus" style="font-size:12px;margin-top:6px;"></div>
+        </div>
+        <div class="field">
+          <label>Driver Name</label>
+          <input type="text" id="driverName" placeholder="Auto-filled after a valid match" readonly style="background:#f0f0f0;color:var(--muted);">
         </div>
         <button class="btn btn-primary" id="saveBtn" onclick="submitEntry()">Save Diesel Entry</button>
         <button class="btn btn-outline" onclick="cancelToScan()">Cancel / Scan Different Vehicle</button>
@@ -244,7 +286,7 @@
         <div class="info-row"><div class="label">Meter Reading</div><div class="value" id="sMeter">-</div></div>
         <div class="info-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
         <div class="info-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Vehicle</button>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Forklift</button>
       </div>
     </div>
 
@@ -264,6 +306,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentVehicle = null; // { code, vehicle, datetime, quantity, meterReading }
 let html5QrCode = null;
 let scanLocked = false;
+let matchedDriver = null; // { name, id_or_mobile } once a valid driver is found
+let driverSearchTimer = null;
+let vehicleListCache = null; // [{code, vehicle_name}] loaded once, reused for manual-code suggestions
 
 /* ============ INIT ============ */
 document.addEventListener("DOMContentLoaded", () => {
@@ -271,11 +316,74 @@ document.addEventListener("DOMContentLoaded", () => {
   if (op) {
     showLoggedInHeader(op);
     showScreen("scan");
-    startScanner();
+    // Camera is only requested when the operator taps "Start Camera" —
+    // not automatically here — so it works reliably on iOS/Android
+    // browsers that block getUserMedia without a direct user gesture.
   } else {
     showScreen("login");
   }
+
+  const manualCodeInput = document.getElementById("manualCode");
+  manualCodeInput.addEventListener("input", onManualCodeInput);
+  manualCodeInput.addEventListener("focus", onManualCodeInput);
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#manualEntry")) hideSuggestions("manualCodeSuggestions");
+  });
+
+  const driverInput = document.getElementById("driverLookup");
+  driverInput.addEventListener("input", () => {
+    clearTimeout(driverSearchTimer);
+    driverSearchTimer = setTimeout(searchDriver, 400); // debounce, also renders suggestions
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#driverLookup") && !e.target.closest("#driverSuggestions")) {
+      hideSuggestions("driverSuggestions");
+    }
+  });
 });
+
+function hideSuggestions(elId) {
+  const el = document.getElementById(elId);
+  el.classList.add("hidden");
+  el.innerHTML = "";
+}
+
+/* ============ VEHICLE CODE AUTOSUGGEST (manual entry) ============ */
+async function loadVehicleListCache() {
+  if (vehicleListCache) return vehicleListCache; // load once, reuse
+  const { data, error } = await sb.from("master").select("code, vehicle_name").order("code");
+  if (error) { console.error(error); return []; }
+  vehicleListCache = data || [];
+  return vehicleListCache;
+}
+
+async function onManualCodeInput() {
+  const input = document.getElementById("manualCode");
+  const val = input.value.trim().toLowerCase();
+  const box = document.getElementById("manualCodeSuggestions");
+
+  const list = await loadVehicleListCache();
+  const matches = val
+    ? list.filter(v => v.code.toLowerCase().includes(val) || v.vehicle_name.toLowerCase().includes(val)).slice(0, 8)
+    : list.slice(0, 8); // show a few options even before typing, on focus
+
+  if (matches.length === 0) { hideSuggestions("manualCodeSuggestions"); return; }
+
+  box.innerHTML = matches.map(v =>
+    '<div class="sug-item" data-code="' + escapeHtml(v.code) + '">' +
+    '<strong>' + escapeHtml(v.code) + '</strong>' +
+    '<span class="sug-sub">' + escapeHtml(v.vehicle_name) + '</span>' +
+    '</div>'
+  ).join("");
+  box.classList.remove("hidden");
+
+  box.querySelectorAll(".sug-item").forEach(item => {
+    item.addEventListener("click", () => {
+      input.value = item.getAttribute("data-code");
+      hideSuggestions("manualCodeSuggestions");
+    });
+  });
+}
 
 /* ============ LOCAL STORAGE HELPERS ============ */
 /* Still fine to keep the operator's own session in localStorage -   */
@@ -346,7 +454,10 @@ async function handleLogin() {
     setOperator(finalName, finalMobile);
     showLoggedInHeader({ name: finalName, mobile: finalMobile });
     showScreen("scan");
-    startScanner();
+    // Not auto-starting here either — this runs after an async network
+    // call, and some browsers (notably Safari) no longer treat that as
+    // a valid "user gesture" for camera access. Tapping Start Camera
+    // right after keeps it a fresh, reliable gesture.
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Login";
@@ -369,29 +480,80 @@ function showError(box, msg) {
 }
 
 /* ============ QR SCANNER ============ */
-function startScanner() {
+async function startScanner() {
   scanLocked = false;
-  document.getElementById("scanStatus").textContent = "Point camera at the QR code";
+  const statusEl = document.getElementById("scanStatus");
+  const startWrap = document.getElementById("startCameraWrap");
+  startWrap.style.display = "none";
+  statusEl.textContent = "Requesting camera access...";
+
+  // 1. Basic environment checks that explain the most common failures.
+  if (location.protocol === "content:" || location.protocol === "file:") {
+    statusEl.textContent = "This page was opened as a local file (not a website), so the camera is blocked by the browser. Open this app's real https:// link in Chrome/Safari instead — not from WhatsApp's built-in file viewer.";
+    return;
+  }
+  if (!window.isSecureContext) {
+    statusEl.textContent = "Camera blocked: this page must be opened over HTTPS (or localhost) for the camera to work.";
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusEl.textContent = "Camera not supported in this browser. Use manual entry below.";
+    return;
+  }
+
   const readerEl = document.getElementById("qr-reader");
   readerEl.innerHTML = "";
-
-  html5QrCode = new Html5Qrcode("qr-reader");
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
   const config = { fps: 10, qrbox: { width: 220, height: 220 } };
 
-  html5QrCode.start(
-    { facingMode: "environment" },
-    config,
-    (decodedText) => {
-      if (scanLocked) return;
-      scanLocked = true;
-      document.getElementById("scanStatus").textContent = "Code detected: " + decodedText;
-      stopScanner();
-      lookupVehicle(decodedText.trim());
-    },
-    () => { /* ignore per-frame scan errors */ }
-  ).catch(() => {
-    document.getElementById("scanStatus").textContent = "Camera not available. Use manual entry below.";
-  });
+  const onScanSuccess = (decodedText) => {
+    if (scanLocked) return;
+    scanLocked = true;
+    statusEl.textContent = "Code detected: " + decodedText;
+    stopScanner();
+    lookupVehicle(decodedText.trim());
+  };
+  const onScanFailure = () => { /* ignore per-frame scan errors */ };
+
+  // 2. Try the simple/preferred path first: back camera via facingMode.
+  try {
+    await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure);
+    startWrap.style.display = "none";
+    statusEl.textContent = "Point camera at the QR code";
+    return;
+  } catch (err) {
+    console.warn("facingMode start failed, trying camera list fallback:", err);
+  }
+
+  // 3. Fallback: enumerate actual cameras and pick a back camera if possible.
+  //    This covers devices/browsers where facingMode constraints are rejected
+  //    outright even though a usable camera exists.
+  try {
+    const cameras = await Html5Qrcode.getCameras();
+    if (!cameras || cameras.length === 0) {
+      statusEl.textContent = "No camera found on this device. Use manual entry below.";
+      return;
+    }
+    const backCamera = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[0];
+    await html5QrCode.start({ deviceId: { exact: backCamera.id } }, config, onScanSuccess, onScanFailure);
+    startWrap.style.display = "none";
+    statusEl.textContent = "Point camera at the QR code";
+  } catch (err) {
+    console.error("Camera start failed:", err);
+    const name = err && err.name;
+    let reason = "Camera not available. Use manual entry below.";
+    if (name === "NotAllowedError") {
+      reason = "Camera permission was denied. Please allow camera access in your browser settings, then tap Start Camera again.";
+    } else if (name === "NotFoundError") {
+      reason = "No camera found on this device. Use manual entry below.";
+    } else if (name === "NotReadableError") {
+      reason = "Camera is already in use by another app or browser tab. Close it and try Start Camera again.";
+    } else if (name === "OverconstrainedError") {
+      reason = "No camera matched the required settings. Use manual entry below.";
+    }
+    statusEl.textContent = reason;
+    startWrap.style.display = "block";
+  }
 }
 
 function stopScanner() {
@@ -433,21 +595,44 @@ async function lookupVehicle(code) {
     }
 
     const { data: lastEntry, error: eErr } = await sb
-      .from("diesel_data")
+      .from("latest_data")
       .select("entry_datetime, quantity, meter_reading")
-      .ilike("code", upperCode)
-      .order("entry_datetime", { ascending: false })
-      .limit(1)
+      .eq("code", upperCode)
       .maybeSingle();
 
     if (eErr) throw eErr;
+
+    // Small, indexed single-row lookup — same pattern as latest_data,
+    // never touches historical diesel_data.
+    const { data: rateRow, error: rErr } = await sb
+      .from("consumption_rate")
+      .select("consumption_rate_per_day")
+      .eq("code", upperCode)
+      .maybeSingle();
+
+    if (rErr) console.error(rErr); // non-critical — don't block the lookup on this
+
+    // Latest applicable duty record for this vehicle (indexed on
+    // code + duty_start desc) — never scans all duty history.
+    const { data: dutyRow, error: dErr } = await sb
+      .from("duty_records")
+      .select("driver_name, location")
+      .eq("code", upperCode)
+      .order("duty_start", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (dErr) console.error(dErr); // non-critical — don't block the lookup on this
 
     currentVehicle = {
       code: vehicle.code,
       vehicle: vehicle.vehicle_name,
       datetime: lastEntry ? lastEntry.entry_datetime : null,
       quantity: lastEntry ? lastEntry.quantity : null,
-      meterReading: lastEntry ? lastEntry.meter_reading : null
+      meterReading: lastEntry ? lastEntry.meter_reading : null,
+      consumptionRate: rateRow ? rateRow.consumption_rate_per_day : null,
+      dutyDriver: dutyRow ? dutyRow.driver_name : null,
+      dutyLocation: dutyRow ? dutyRow.location : null
     };
 
     renderVehicleInfo(currentVehicle);
@@ -462,6 +647,26 @@ async function lookupVehicle(code) {
 function renderVehicleInfo(data) {
   document.getElementById("vVehicleName").textContent = data.vehicle;
   document.getElementById("vCode").textContent = data.code;
+  renderLastConsumption(data);
+
+  document.getElementById("entryQuantity").value = "";
+  document.getElementById("entryMeter").value = "";
+  document.getElementById("entryError").innerHTML = "";
+  document.getElementById("driverLookup").value = "";
+  document.getElementById("driverName").value = "";
+  document.getElementById("driverStatus").innerHTML = "";
+  hideSuggestions("driverSuggestions");
+  matchedDriver = null;
+}
+
+function renderLastConsumption(data) {
+  document.getElementById("vConsumptionRate").textContent =
+    (data.consumptionRate !== null && data.consumptionRate !== undefined)
+      ? data.consumptionRate + " L/day"
+      : "-";
+
+  document.getElementById("vDutyDriver").textContent = data.dutyDriver || "N/A";
+  document.getElementById("vDutyLocation").textContent = data.dutyLocation || "N/A";
 
   if (data.datetime) {
     const dt = new Date(data.datetime);
@@ -479,10 +684,6 @@ function renderVehicleInfo(data) {
     document.getElementById("vLastMeter").textContent = "-";
     document.getElementById("vTimeSince").textContent = "-";
   }
-
-  document.getElementById("entryQuantity").value = "";
-  document.getElementById("entryMeter").value = "";
-  document.getElementById("entryError").innerHTML = "";
 }
 
 function formatDateTime(dt) {
@@ -491,11 +692,15 @@ function formatDateTime(dt) {
 }
 
 function timeSince(diffMs) {
-  const hours = diffMs / (1000 * 60 * 60);
-  const days = Math.floor(hours / 24);
-  const remHours = Math.floor(hours % 24);
-  const text = days + " day" + (days !== 1 ? "s" : "") + " " + remHours + " hour" + (remHours !== 1 ? "s" : "");
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const remHours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const remMinutes = totalMinutes % 60;
+  const text = days + " Day" + (days !== 1 ? "s" : "") + " " +
+    remHours + " Hour" + (remHours !== 1 ? "s" : "") + " " +
+    remMinutes + " Minute" + (remMinutes !== 1 ? "s" : "");
 
+  const hours = diffMs / (1000 * 60 * 60);
   let statusClass, statusLabel;
   if (hours < 24) {
     statusClass = "status-recent"; statusLabel = "🟢 Recent";
@@ -505,6 +710,76 @@ function timeSince(diffMs) {
     statusClass = "status-delayed"; statusLabel = "🔴 Delayed";
   }
   return { text, statusClass, statusLabel };
+}
+
+/* ============ DRIVER SEARCH ============ */
+async function searchDriver() {
+  const val = document.getElementById("driverLookup").value.trim();
+  const statusEl = document.getElementById("driverStatus");
+  const nameField = document.getElementById("driverName");
+  const box = document.getElementById("driverSuggestions");
+
+  matchedDriver = null;
+  nameField.value = "";
+
+  if (!val) { statusEl.innerHTML = ""; hideSuggestions("driverSuggestions"); return; }
+
+  statusEl.innerHTML = '<span style="color:var(--muted);">Searching...</span>';
+
+  try {
+    // One query serves both: exact-match autofill AND the suggestion
+    // dropdown, so typing a partial ID/mobile/name still shows options.
+    const { data, error } = await sb
+      .from("driver_information")
+      .select("name, driver_id, driver_mobile_number")
+      .or("driver_id.ilike.%" + val + "%,driver_mobile_number.ilike.%" + val + "%,name.ilike.%" + val + "%")
+      .limit(6);
+
+    if (error) throw error;
+    const results = data || [];
+
+    const exact = results.find(d =>
+      d.driver_id.toLowerCase() === val.toLowerCase() ||
+      d.driver_mobile_number.toLowerCase() === val.toLowerCase()
+    );
+
+    if (exact) {
+      matchedDriver = { name: exact.name, idOrMobile: val };
+      nameField.value = exact.name;
+      statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
+      hideSuggestions("driverSuggestions");
+      return;
+    }
+
+    if (results.length === 0) {
+      statusEl.innerHTML = '<span style="color:var(--red);font-weight:600;">Driver not found. Please check Driver ID/Mobile Number.</span>';
+      hideSuggestions("driverSuggestions");
+      return;
+    }
+
+    statusEl.innerHTML = '<span style="color:var(--muted);">Select a matching driver below, or keep typing.</span>';
+    box.innerHTML = results.map(d =>
+      '<div class="sug-item" data-id="' + escapeHtml(d.driver_id) + '" data-mobile="' + escapeHtml(d.driver_mobile_number) + '" data-name="' + escapeHtml(d.name) + '">' +
+      '<strong>' + escapeHtml(d.name) + '</strong>' +
+      '<span class="sug-sub">' + escapeHtml(d.driver_id) + ' · ' + escapeHtml(d.driver_mobile_number) + '</span>' +
+      '</div>'
+    ).join("");
+    box.classList.remove("hidden");
+
+    box.querySelectorAll(".sug-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const idVal = item.getAttribute("data-id");
+        document.getElementById("driverLookup").value = idVal;
+        matchedDriver = { name: item.getAttribute("data-name"), idOrMobile: idVal };
+        nameField.value = item.getAttribute("data-name");
+        statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
+        hideSuggestions("driverSuggestions");
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    statusEl.innerHTML = '<span style="color:var(--red);">Network error while searching driver.</span>';
+  }
 }
 
 /* ============ SUBMIT DIESEL ENTRY ============ */
@@ -520,6 +795,7 @@ async function submitEntry() {
   if (!currentVehicle) { showError(errorBox, "No vehicle selected."); return; }
   if (isNaN(quantity) || quantity <= 0) { showError(errorBox, "Please enter a valid diesel quantity."); return; }
   if (isNaN(meterReading) || meterReading < 0) { showError(errorBox, "Please enter a valid meter reading."); return; }
+  if (!matchedDriver) { showError(errorBox, "Please enter a valid Driver ID/Mobile Number that matches a known driver."); return; }
 
   const btn = document.getElementById("saveBtn");
   btn.disabled = true;
@@ -534,12 +810,16 @@ async function submitEntry() {
         quantity: quantity,
         meter_reading: meterReading,
         operator_name: op.name,
-        operator_mobile: op.mobile
+        operator_mobile: op.mobile,
+        driver_name: matchedDriver.name,
+        driver_id_mobile: matchedDriver.idOrMobile
       })
       .select()
       .single();
 
     if (error) throw error;
+    // Note: latest_data is kept in sync automatically by a database
+    // trigger on diesel_data — no extra client-side write needed here.
 
     btn.disabled = false;
     btn.textContent = "Save Diesel Entry";
@@ -561,6 +841,7 @@ function cancelToScan() {
   currentVehicle = null;
   document.getElementById("manualCode").value = "";
   document.getElementById("manualEntry").classList.add("hidden");
+  hideSuggestions("manualCodeSuggestions");
   showScreen("scan");
   startScanner();
 }
