@@ -4,45 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Forklift Diesel Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --green:#1a7a3c;
-    --green-dark:#125c2c;
-    --green-light:#e8f7ee;
-    --red:#c0392b;
-    --yellow:#e0a800;
-    --bg:#f5f7f6;
-    --text:#1c1c1c;
-    --muted:#6b7280;
-    --border:#d9e2dc;
+    --accent:#2D6CB5; --accent2:#9C3F92; --accent-dark:#1F4E85;
+    --brand-gradient:linear-gradient(135deg,#2D6CB5 0%,#7A4FA0 55%,#9C3F92 100%);
+    --page-gradient:linear-gradient(180deg,#EAF6FF 0%,#F1F0FF 100%);
+    --green:#12B76A; --green-dark:#0B8A4E; --green-light:#E3FBEF;
+    --red:#E5342B; --red-light:#FDE8E7; --yellow:#FFB020; --yellow-light:#FFF4DF;
+    --bg:#EEF2F6; --text:#10151C; --muted:#5B6B7D; --border:#D7DEE6;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     background:var(--bg);
     color:var(--text);
     min-height:100vh;
     -webkit-tap-highlight-color:transparent;
   }
-  .app{max-width:480px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--page-gradient);display:flex;flex-direction:column;}
   header{
-    background:var(--green);
+    background:var(--brand-gradient);
     color:#fff;
     padding:16px 20px;
     display:flex;
     align-items:center;
     justify-content:space-between;
     position:sticky;top:0;z-index:50;
+    border-bottom:3px solid var(--accent);
   }
-  header h1{font-size:18px;font-weight:600;}
+  header h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.3px;}
   header .sub{font-size:12px;opacity:.85;margin-top:2px;}
-  .logout-btn{
-    background:rgba(255,255,255,.15);
-    color:#fff;border:none;padding:8px 14px;border-radius:8px;
-    font-size:13px;font-weight:600;cursor:pointer;
-  }
   main{flex:1;padding:20px;}
   .card{
     background:#fff;
@@ -60,7 +55,7 @@
     width:100%;padding:14px;border:1.5px solid var(--border);border-radius:10px;
     font-size:16px;background:#fafafa;
   }
-  .field input:focus{outline:none;border-color:var(--green);background:#fff;}
+  .field input:focus{outline:none;border-color:var(--accent);background:#fff;}
   .suggestion-list{
     position:absolute;top:100%;left:0;right:0;z-index:60;
     background:#fff;border:1.5px solid var(--green);border-top:none;
@@ -78,8 +73,8 @@
     font-size:16px;font-weight:700;cursor:pointer;
     display:flex;align-items:center;justify-content:center;gap:8px;
   }
-  .btn-primary{background:var(--green);color:#fff;}
-  .btn-primary:active{background:var(--green-dark);}
+  .btn-primary{background:var(--brand-gradient);color:#fff;}
+  .btn-primary:active{background:var(--accent-dark);}
   .btn-secondary{background:var(--green-light);color:var(--green-dark);margin-top:10px;}
   .btn-outline{background:#fff;border:1.5px solid var(--green);color:var(--green);margin-top:10px;}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -88,11 +83,13 @@
     text-align:center;padding:30px 0 10px;
   }
   .center-logo .icon{
-    width:64px;height:64px;background:var(--green-light);border-radius:16px;
+    width:88px;height:88px;
     display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
-    font-size:32px;
   }
-  .center-logo h2{font-size:20px;color:var(--green-dark);}
+  .center-logo .icon img{
+    width:100%;height:100%;object-fit:contain;
+  }
+  .center-logo h2{font-size:20px;color:var(--accent-dark);}
   .center-logo p{font-size:13px;color:var(--muted);margin-top:4px;}
   #qr-reader{
     width:100%;border-radius:12px;overflow:hidden;border:2px solid var(--green);
@@ -138,6 +135,21 @@
     font-size:36px;color:var(--green);
   }
   .success-box h2{color:var(--green-dark);font-size:19px;margin-bottom:16px;}
+  .success-summary{
+    text-align:left;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:4px;
+  }
+  .success-row{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);
+  }
+  .success-row:nth-child(even){background:var(--bg);}
+  .success-row:last-child{border-bottom:none;}
+  .success-row .label{
+    font-size:14px;font-weight:600;color:var(--text);opacity:.65;
+  }
+  .success-row .value{
+    font-size:16px;font-weight:800;color:var(--text);text-align:right;
+  }
   .manual-toggle{
     text-align:center;font-size:13px;color:var(--green);font-weight:600;
     margin-top:12px;cursor:pointer;text-decoration:underline;
@@ -146,6 +158,132 @@
     text-align:center;padding:30px 0;color:var(--muted);
   }
   .section-title{font-size:14px;font-weight:700;color:var(--green-dark);margin-bottom:12px;}
+  .vstatus-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#fff;}
+  .vstatus-running{background:var(--green);}
+  .vstatus-breakdown{background:var(--red);}
+  .vstatus-wip{background:var(--yellow);color:#3A2600;}
+  #uv-qr-reader{width:100%;border-radius:12px;overflow:hidden;border:2px solid var(--accent);}
+  .uv-suggestion-list{border:1.5px solid var(--accent);border-top:none;border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;margin-top:-14px;margin-bottom:14px;background:#fff;}
+  .uv-suggestion-list .sug-item{padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid #f0f0f0;}
+  .uv-suggestion-list .sug-item:last-child{border-bottom:none;}
+  .uv-suggestion-list .sug-item:active{background:var(--accent);color:#fff;}
+  .vc-code{color:var(--muted);font-weight:600;font-size:11px;}
+
+  /* ---- Password field show/hide ---- */
+  .pw-wrap{position:relative;}
+  .pw-wrap input{padding-right:46px;}
+  .pw-toggle{
+    position:absolute;right:6px;top:50%;transform:translateY(6px);
+    background:none;border:none;font-size:18px;cursor:pointer;padding:8px;color:var(--muted);
+  }
+
+  /* ---- Full-screen page header (used by Vehicle Info & Account) ---- */
+  .page-header{
+    display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  }
+  .page-header .back-btn{
+    background:#fff;border:1.5px solid var(--border);width:38px;height:38px;border-radius:10px;
+    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .page-header h2{font-size:19px;color:var(--text);}
+
+  /* ---- Fixed bottom navigation ---- */
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;
+    max-width:480px;margin:0 auto;
+    background:#fff;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-around;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+    z-index:150;
+    box-shadow:0 -2px 10px rgba(0,0,0,.06);
+  }
+  .bottom-nav.hidden{display:none;}
+  .nav-item{
+    background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;font-size:9.5px;font-weight:600;color:var(--muted);cursor:pointer;padding:6px 4px;border-radius:10px;
+    min-width:0;flex:1;max-width:72px;
+  }
+  .nav-item .nav-icon{font-size:18px;line-height:1;}
+  .nav-item.active{color:var(--accent);}
+  .nav-item.active .nav-icon{filter:drop-shadow(0 1px 1px rgba(0,145,234,.3));}
+  .nav-item-plus{
+    background:var(--brand-gradient);color:#fff;width:50px;height:50px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;
+    box-shadow:0 4px 14px rgba(0,145,234,.45);cursor:pointer;border:none;
+    margin-top:-20px;flex-shrink:0;
+  }
+  .nav-item-plus:active{background:var(--accent-dark);}
+  .with-bottom-nav{padding-bottom:84px;}
+
+  /* ---- Home stat card ---- */
+  .stat-card{
+    background:var(--brand-gradient);border-radius:14px;padding:16px 18px;margin-bottom:16px;
+    color:#fff;display:flex;align-items:center;gap:14px;
+  }
+  .stat-card .stat-icon{
+    width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;
+  }
+  .stat-card .stat-label{font-size:12px;opacity:.9;font-weight:600;}
+  .stat-card .stat-value{font-size:20px;font-weight:800;margin-top:1px;}
+
+  /* ---- Reading page ---- */
+  .reading-hero{
+    text-align:center;background:var(--brand-gradient);border-radius:16px;padding:26px 20px;color:#fff;margin-bottom:16px;
+  }
+  .reading-hero .rh-label{font-size:13px;opacity:.9;font-weight:600;letter-spacing:.3px;text-transform:uppercase;}
+  .reading-hero .rh-value{font-size:38px;font-weight:800;margin-top:6px;}
+  .reading-hero .rh-unit{font-size:16px;font-weight:600;opacity:.85;}
+  .diff-badge{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:14px;font-weight:800;margin-top:6px;
+  }
+  .diff-match{background:var(--green-light);color:var(--green-dark);}
+  .diff-mismatch{background:#fdeceb;color:var(--red);}
+
+  /* ---- Oil page ---- */
+  .oil-row{
+    border-bottom:1px solid var(--border);padding:14px 0;
+  }
+  .oil-row:last-child{border-bottom:none;}
+  .oil-row .oil-row-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;}
+  .oil-latest-row{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .oil-latest-row:last-child{border-bottom:none;}
+  .oil-latest-name{font-size:14px;font-weight:700;color:var(--text);}
+  .oil-latest-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .oil-latest-qty{font-size:15px;font-weight:800;color:var(--text);text-align:right;white-space:nowrap;}
+  .qty-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .qty-btn{
+    background:#fff;border:1.5px solid var(--border);border-radius:9px;
+    padding:9px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;min-width:48px;text-align:center;
+  }
+  .qty-btn.sel{background:var(--brand-gradient);border-color:transparent;color:#fff;}
+  .qty-other-input{
+    background:#fff;border:1.5px solid var(--border);border-radius:9px;
+    padding:9px 12px;font-size:14px;font-weight:600;color:var(--text);width:88px;
+  }
+  .qty-other-input:focus{outline:none;border-color:var(--accent);}
+  .purpose-btns{display:flex;gap:10px;}
+  .purpose-btn{
+    flex:1;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;
+    text-align:left;cursor:pointer;
+  }
+  .purpose-btn .pb-title{font-size:14px;font-weight:800;color:var(--text);}
+  .purpose-btn .pb-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .purpose-btn.sel{border-color:var(--accent);background:linear-gradient(0deg,rgba(45,108,181,.06),rgba(45,108,181,.06));}
+  .purpose-btn.sel .pb-title{color:var(--accent-dark);}
+  .scan-cta{
+    text-align:center;background:var(--brand-gradient);color:#fff;border:none;border-radius:14px;
+    padding:22px 20px;width:100%;font-size:16px;font-weight:800;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .scan-cta .cta-icon{font-size:34px;}
+  .vehicle-confirm-badge{
+    display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);
+    font-size:12px;font-weight:800;padding:6px 12px;border-radius:20px;margin-bottom:10px;
+  }
 </style>
 </head>
 <body>
@@ -155,15 +293,14 @@
       <h1>Forklift Diesel Tracker</h1>
       <div class="sub" id="headerSub">Field Operations</div>
     </div>
-    <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
   </header>
 
-  <main>
+  <main class="with-bottom-nav">
 
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="loginScreen">
       <div class="center-logo">
-        <div class="icon">🚜</div>
+        <div class="icon"><img src="logo.png" alt="XIC Logo"></div>
         <h2>Operator Login</h2>
         <p>Enter your details to start recording diesel entries</p>
       </div>
@@ -177,12 +314,28 @@
           <label>Mobile Number</label>
           <input type="tel" id="loginMobile" placeholder="e.g. 017XXXXXXXX" autocomplete="off">
         </div>
+        <div class="field">
+          <label>ID Number</label>
+          <input type="text" id="loginId" placeholder="Enter your ID number" autocomplete="off">
+        </div>
+        <div class="field pw-wrap">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="off">
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPassword', this)">👁️</button>
+        </div>
         <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Login</button>
       </div>
     </div>
 
     <!-- ================= SCAN SCREEN ================= -->
     <div id="scanScreen" class="hidden">
+      <div class="stat-card">
+        <div class="stat-icon">🚚</div>
+        <div>
+          <div class="stat-label">Diesel Received Today</div>
+          <div class="stat-value" id="dieselReceivedCount">- Vehicles</div>
+        </div>
+      </div>
       <div class="card">
         <div class="section-title">
           <span>Scan Forklift QR Code</span>
@@ -281,16 +434,243 @@
       <div class="card success-box">
         <div class="icon">✓</div>
         <h2>Diesel Entry Saved Successfully</h2>
-        <div class="info-row"><div class="label">Vehicle</div><div class="value" id="sVehicle">-</div></div>
-        <div class="info-row"><div class="label">Diesel</div><div class="value" id="sQuantity">-</div></div>
-        <div class="info-row"><div class="label">Meter Reading</div><div class="value" id="sMeter">-</div></div>
-        <div class="info-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
-        <div class="info-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
+        <div class="success-summary">
+          <div class="success-row"><div class="label">Vehicle</div><div class="value" id="sVehicle">-</div></div>
+          <div class="success-row"><div class="label">Diesel</div><div class="value" id="sQuantity">-</div></div>
+          <div class="success-row"><div class="label">Meter Reading</div><div class="value" id="sMeter">-</div></div>
+          <div class="success-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
+          <div class="success-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
+        </div>
         <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Forklift</button>
       </div>
     </div>
 
+    <!-- ================= VEHICLE INFO FULL-SCREEN PAGE ================= -->
+    <div id="vehicleInfoScreen" class="hidden">
+      <div class="page-header">
+        <button class="back-btn" onclick="showTab('home')">←</button>
+        <h2>Vehicle Information</h2>
+      </div>
+
+      <div id="uvScanScreen">
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Scan or Search Vehicle</div>
+          <div id="uv-qr-reader"></div>
+          <div id="uvStartCameraWrap" style="text-align:center;padding:16px 0;">
+            <button class="btn btn-primary" style="width:auto;padding:12px 24px;" onclick="uvStartScanner()">📷 Start Camera</button>
+          </div>
+          <div class="scan-status" id="uvScanStatus"></div>
+          <div class="field" style="margin-top:14px;">
+            <label>Or search by vehicle name / code</label>
+            <input type="text" id="uvSearchInput" placeholder="Start typing..." autocomplete="off" oninput="uvOnSearchInput()">
+          </div>
+          <div id="uvSearchSuggestions" class="uv-suggestion-list hidden"></div>
+        </div>
+      </div>
+
+      <div id="uvDetailScreen" class="hidden">
+        <div class="card" id="uvStatusCard" style="background:var(--bg);">
+          <div style="font-size:19px;font-weight:800;" id="uvVehicleName">-</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="uvVehicleCode">-</div>
+          <div style="margin-top:8px;" id="uvStatusBadge"></div>
+          <div class="info-row"><div class="label">Location</div><div class="value" id="uvLocation">-</div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Current Driver</div>
+          <div id="uvCurrentDriver"></div>
+          <div class="section-title">Last Driver</div>
+          <div id="uvLastDriver"></div>
+        </div>
+        <div class="card" id="uvMechanicCard">
+          <div class="section-title">Active Mechanic(s)</div>
+          <div id="uvMechanics"></div>
+        </div>
+        <button class="btn btn-outline" onclick="uvBackToScan()" style="background:#fff;border:1.5px solid var(--accent);color:var(--accent);">Search Another Vehicle</button>
+      </div>
+    </div>
+
+    <!-- ================= ACCOUNT PAGE ================= -->
+    <div id="accountScreen" class="hidden">
+      <div class="page-header">
+        <h2>Account</h2>
+      </div>
+      <div class="card">
+        <div class="info-row"><div class="label">Operator Name</div><div class="value" id="acName">-</div></div>
+        <div class="info-row"><div class="label">Mobile Number</div><div class="value" id="acMobile">-</div></div>
+        <div class="info-row"><div class="label">ID Number</div><div class="value" id="acId">-</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="margin-top:0;">Change Password</div>
+        <div id="pwError"></div>
+        <div id="pwSuccess"></div>
+        <div class="field pw-wrap">
+          <label>Current Password</label>
+          <input type="password" id="pwCurrent" autocomplete="off">
+          <button type="button" class="pw-toggle" onclick="togglePw('pwCurrent', this)">👁️</button>
+        </div>
+        <div class="field pw-wrap">
+          <label>New Password</label>
+          <input type="password" id="pwNew" autocomplete="off">
+          <button type="button" class="pw-toggle" onclick="togglePw('pwNew', this)">👁️</button>
+        </div>
+        <div class="field pw-wrap">
+          <label>Confirm New Password</label>
+          <input type="password" id="pwConfirm" autocomplete="off">
+          <button type="button" class="pw-toggle" onclick="togglePw('pwConfirm', this)">👁️</button>
+        </div>
+        <button class="btn btn-primary" id="pwChangeBtn" onclick="handleChangePassword()">Change Password</button>
+      </div>
+
+      <button class="btn btn-outline" style="background:#fff;border:1.5px solid var(--red);color:var(--red);" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- ================= READING FULL-SCREEN PAGE ================= -->
+    <div id="readingScreen" class="hidden">
+      <div class="page-header">
+        <button class="back-btn" onclick="showTab('home')">←</button>
+        <h2>Dispenser Reading</h2>
+      </div>
+
+      <div class="reading-hero">
+        <div class="rh-label">Expected Dispenser Reading</div>
+        <div class="rh-value"><span id="rExpected">-</span> <span class="rh-unit">L</span></div>
+      </div>
+
+      <div class="card">
+        <div class="info-row"><div class="label">Date</div><div class="value" id="rDate">-</div></div>
+        <div class="info-row"><div class="label">Starting Reading</div><div class="value" id="rStarting">-</div></div>
+        <div class="info-row"><div class="label">Diesel Dispensed Today</div><div class="value" id="rDispensed">-</div></div>
+        <div class="info-row"><div class="label">Expected Reading</div><div class="value" id="rExpected2">-</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="margin-top:0;">Verify Against Physical Dispenser</div>
+        <div class="field">
+          <label>Actual Dispenser Reading (L)</label>
+          <input type="number" id="rActualInput" placeholder="Enter the number shown on the machine" inputmode="decimal">
+        </div>
+        <button class="btn btn-primary" onclick="checkReadingDifference()">Check Difference</button>
+        <div id="rDiffResult" style="margin-top:14px;"></div>
+      </div>
+    </div>
+
+    <!-- ================= OIL FULL-SCREEN PAGE ================= -->
+    <div id="oilScreen" class="hidden">
+      <div class="page-header">
+        <button class="back-btn" onclick="showTab('home')">←</button>
+        <h2>Oil Tracker</h2>
+      </div>
+
+      <!-- ---- Scan state ---- -->
+      <div id="oilScanBlock">
+        <div class="card">
+          <div id="oilScanCtaWrap">
+            <button class="scan-cta" onclick="oilStartScanner()">
+              <span class="cta-icon">📷</span>
+              <span>Scan Vehicle QR</span>
+            </button>
+          </div>
+          <div id="oil-qr-reader" style="margin-top:14px;"></div>
+          <div class="scan-status" id="oilScanStatus"></div>
+          <div class="manual-toggle" onclick="oilToggleManual()">Enter code manually instead</div>
+          <div id="oilManualEntry" class="hidden" style="margin-top:14px;">
+            <div class="field" style="position:relative;">
+              <label>Vehicle Code or Name</label>
+              <input type="text" id="oilManualCode" placeholder="e.g. DF01 or Forklift 1" autocomplete="off" oninput="oilOnManualInput()">
+              <div id="oilManualSuggestions" class="uv-suggestion-list hidden"></div>
+            </div>
+            <button class="btn btn-outline" onclick="oilSubmitManualCode()">Lookup Vehicle</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- Vehicle confirmed + Oil entry form ---- -->
+      <div id="oilFormBlock" class="hidden">
+        <div class="card">
+          <div class="vehicle-confirm-badge">✓ Vehicle Scanned</div>
+          <div class="info-row"><div class="label">Vehicle Name</div><div class="value" id="oilVehicleName">-</div></div>
+          <div class="info-row"><div class="label">Vehicle Code</div><div class="value" id="oilVehicleCode">-</div></div>
+        </div>
+
+        <div class="card hidden" id="oilLatestCard">
+          <div class="section-title" style="margin-top:0;">Latest Oil Record</div>
+          <div id="oilLatestInfo"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Driver</div>
+          <div class="field" style="position:relative;">
+            <label>Driver ID / Mobile Number</label>
+            <input type="text" id="oilDriverLookup" placeholder="e.g. DR-1025 or 017XXXXXXXX" autocomplete="off" oninput="oilSearchDriver()">
+            <div id="oilDriverSuggestions" class="suggestion-list hidden"></div>
+          </div>
+          <div id="oilDriverStatus" style="font-size:13px;margin-bottom:10px;"></div>
+          <div class="field">
+            <label>Driver Name</label>
+            <input type="text" id="oilDriverName" placeholder="Auto-filled after match" readonly style="background:var(--bg);">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Oil Quantities (Litres)</div>
+          <div id="oilRowsContainer"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Purpose</div>
+          <div class="purpose-btns" id="oilPurposeBtns">
+            <button type="button" class="purpose-btn" data-purpose="Scheduled" onclick="oilSelectPurpose('Scheduled')">
+              <div class="pb-title">Scheduled</div>
+              <div class="pb-sub">Routine maintenance</div>
+            </button>
+            <button type="button" class="purpose-btn" data-purpose="Loss Oil" onclick="oilSelectPurpose('Loss Oil')">
+              <div class="pb-title">Loss Oil</div>
+              <div class="pb-sub">Leak / unplanned use</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field" style="margin-bottom:0;">
+            <label>Current Meter Reading</label>
+            <input type="number" id="oilMeterReading" placeholder="e.g. 4521" inputmode="decimal">
+          </div>
+        </div>
+
+        <div id="oilEntryError"></div>
+        <button class="btn btn-primary" id="oilSaveBtn" onclick="oilSubmitEntry()">Save Oil Entry</button>
+        <button class="btn btn-outline" onclick="oilResetToScan()" style="background:#fff;border:1.5px solid var(--accent);color:var(--accent);">Scan Another Vehicle</button>
+      </div>
+
+      <!-- ---- Success state ---- -->
+      <div id="oilSuccessBlock" class="hidden">
+        <div class="card success-box">
+          <div class="icon">✓</div>
+          <h2>Oil Record Saved Successfully</h2>
+          <div class="success-summary" id="oilSuccessSummary"></div>
+          <button class="btn btn-primary" style="margin-top:20px;" onclick="oilResetToScan()">Scan Next Vehicle</button>
+        </div>
+      </div>
+    </div>
+
   </main>
+
+  <div class="bottom-nav hidden" id="bottomNav">
+    <button class="nav-item" id="navHome" onclick="showTab('home')">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </button>
+    <button class="nav-item" id="navReading" onclick="showTab('reading')">
+      <span class="nav-icon">📊</span><span>Reading</span>
+    </button>
+    <button class="nav-item-plus" id="navPlus" onclick="showTab('vehicle')">+</button>
+    <button class="nav-item" id="navOil" onclick="showTab('oil')">
+      <span class="nav-icon">🛢️</span><span>Oil</span>
+    </button>
+    <button class="nav-item" id="navAccount" onclick="showTab('account')">
+      <span class="nav-icon">👤</span><span>Account</span>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -315,7 +695,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const op = getOperator();
   if (op) {
     showLoggedInHeader(op);
-    showScreen("scan");
+    document.getElementById("bottomNav").classList.remove("hidden");
+    showTab("home");
     // Camera is only requested when the operator taps "Start Camera" —
     // not automatically here — so it works reliably on iOS/Android
     // browsers that block getUserMedia without a direct user gesture.
@@ -357,22 +738,82 @@ async function loadVehicleListCache() {
   return vehicleListCache;
 }
 
+/*
+ * Vehicle code structure (do NOT change how codes are stored — this only
+ * makes searching them human-friendly):
+ *   pos 1      = Location    (X = Monica/Monalisa, S = Sanitary)
+ *   pos 2-3    = Vehicle Type (e.g. PL, FL, DT, EF, EX)
+ *   pos 4-7    = Vehicle Number (4 digits)
+ *   pos 8      = Ownership   (O = Own, R = Rental)
+ *
+ * smartVehicleMatch() lets a user type things like "F12", "FL12", "DT6986",
+ * "PL5" etc. and still find the right vehicle, without needing the full
+ * code. It works entirely against the already-loaded vehicle list (no
+ * extra network calls per keystroke) and falls back to a plain
+ * code/vehicle-name substring search so full or partial codes and names
+ * keep working exactly as before.
+ */
+const VEHICLE_CODE_RE = /^[A-Z]{3}\d{4}[A-Z]$/;
+
+function smartVehicleMatch(list, rawQuery, limit) {
+  limit = limit || 8;
+  const q = (rawQuery || "").replace(/\s+/g, "").toUpperCase();
+  if (!q) return list.slice(0, limit);
+
+  const digits = (q.match(/\d+/g) || []).join("");
+  const letters = q.replace(/[0-9]/g, "");
+
+  const scored = [];
+  list.forEach(v => {
+    const code = (v.code || "").toUpperCase();
+    const name = (v.vehicle_name || "").toUpperCase().replace(/\s+/g, "");
+    let score = null;
+
+    // 1. Direct hit — covers full/partial codes and vehicle-name search exactly as before.
+    if (code.includes(q) || name.includes(q)) {
+      score = 0;
+    }
+
+    // 2. Structured hit — "<type letters><vehicle number>" e.g. F12, FL12, DT6986, PL5, X12.
+    if (score === null && VEHICLE_CODE_RE.test(code) && (letters || digits)) {
+      const type = code.substring(1, 3);     // 2nd-3rd chars
+      const locType = code.substring(0, 3);  // location + type, e.g. "XFL"
+      const typeMatches = !letters || locType.includes(letters) || type.includes(letters);
+
+      if (typeMatches) {
+        if (digits) {
+          const codeNum = parseInt(code.substring(3, 7), 10);
+          const queryNum = parseInt(digits, 10);
+          if (!isNaN(codeNum) && !isNaN(queryNum)) {
+            score = codeNum === queryNum ? 1 : (10 + Math.abs(codeNum - queryNum));
+          }
+        } else {
+          score = 2; // type matched, number not typed yet
+        }
+      }
+    }
+
+    if (score !== null) scored.push({ v, score });
+  });
+
+  scored.sort((a, b) => a.score - b.score);
+  return scored.slice(0, limit).map(s => s.v);
+}
+
 async function onManualCodeInput() {
   const input = document.getElementById("manualCode");
-  const val = input.value.trim().toLowerCase();
+  const val = input.value.trim();
   const box = document.getElementById("manualCodeSuggestions");
 
   const list = await loadVehicleListCache();
-  const matches = val
-    ? list.filter(v => v.code.toLowerCase().includes(val) || v.vehicle_name.toLowerCase().includes(val)).slice(0, 8)
-    : list.slice(0, 8); // show a few options even before typing, on focus
+  const matches = smartVehicleMatch(list, val, 8);
 
   if (matches.length === 0) { hideSuggestions("manualCodeSuggestions"); return; }
 
   box.innerHTML = matches.map(v =>
     '<div class="sug-item" data-code="' + escapeHtml(v.code) + '">' +
-    '<strong>' + escapeHtml(v.code) + '</strong>' +
-    '<span class="sug-sub">' + escapeHtml(v.vehicle_name) + '</span>' +
+    '<strong>' + escapeHtml(v.vehicle_name) + '</strong>' +
+    '<span class="sug-sub">' + escapeHtml(v.code) + '</span>' +
     '</div>'
   ).join("");
   box.classList.remove("hidden");
@@ -386,78 +827,221 @@ async function onManualCodeInput() {
 }
 
 /* ============ LOCAL STORAGE HELPERS ============ */
-/* Still fine to keep the operator's own session in localStorage -   */
-/* this is just "who is using this phone right now", not the data.  */
+/* Only the operator's own identity is kept here - "who is using this */
+/* phone right now" - never the password.                            */
 function getOperator() {
   const raw = localStorage.getItem("operator");
   return raw ? JSON.parse(raw) : null;
 }
-function setOperator(name, mobile) {
-  localStorage.setItem("operator", JSON.stringify({ name, mobile }));
+function setOperator(name, mobile, xicId) {
+  localStorage.setItem("operator", JSON.stringify({ name, mobile, xicId }));
 }
 function clearOperator() {
   localStorage.removeItem("operator");
 }
 
-/* ============ SCREEN MANAGEMENT ============ */
+/* ============ SCREEN MANAGEMENT (pre-login screens) ============ */
 function showScreen(name) {
   const screens = ["login", "scan", "loading", "vehicle", "success"];
   screens.forEach(s => {
     const el = document.getElementById(s + "Screen");
     if (el) el.classList.toggle("hidden", s !== name);
   });
-  document.getElementById("logoutBtn").classList.toggle("hidden", name === "login");
+  document.getElementById("vehicleInfoScreen").classList.add("hidden");
+  document.getElementById("accountScreen").classList.add("hidden");
+  document.getElementById("readingScreen").classList.add("hidden");
+  document.getElementById("oilScreen").classList.add("hidden");
+  if (name === "login") {
+    document.getElementById("bottomNav").classList.add("hidden");
+  } else {
+    document.getElementById("bottomNav").classList.remove("hidden");
+    document.getElementById("navHome").classList.add("active");
+    document.getElementById("navReading").classList.remove("active");
+    document.getElementById("navOil").classList.remove("active");
+    document.getElementById("navAccount").classList.remove("active");
+  }
 }
 
 function showLoggedInHeader(op) {
   document.getElementById("headerSub").textContent = "Logged in: " + op.name;
 }
 
+/* ============ TOP-LEVEL TAB ROUTER (Home / Reading / + / Oil / Account) ============ */
+function showTab(tab) {
+  const op = getOperator();
+  if (!op) { showScreen("login"); return; }
+
+  if (tab !== "vehicle") uvStopScanner();
+  if (tab !== "home") stopScanner();
+  if (tab !== "oil") oilStopScanner();
+
+  // Home covers scan / loading / vehicle(entry) / success sub-screens,
+  // so let showScreen handle which of those is currently active; default
+  // to the scan screen when freshly switching into Home.
+  const homeScreens = ["scan", "loading", "vehicle", "success"];
+  const vehicleInfoEl = document.getElementById("vehicleInfoScreen");
+  const accountEl = document.getElementById("accountScreen");
+  const readingEl = document.getElementById("readingScreen");
+  const oilEl = document.getElementById("oilScreen");
+
+  if (tab === "home") {
+    vehicleInfoEl.classList.add("hidden");
+    accountEl.classList.add("hidden");
+    readingEl.classList.add("hidden");
+    oilEl.classList.add("hidden");
+    const anyHomeVisible = homeScreens.some(s => !document.getElementById(s + "Screen").classList.contains("hidden"));
+    if (!anyHomeVisible) {
+      showScreenKeepingChrome("scan");
+      // Auto-open the QR scanner the moment Home becomes the active
+      // screen, so the operator doesn't have to tap "Start Camera"
+      // themselves. startScanner() already falls back to showing the
+      // manual "Start Camera" button if the browser blocks/denies it.
+      startScanner();
+    }
+    refreshDieselReceivedCount();
+  } else if (tab === "vehicle") {
+    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
+    document.getElementById("loginScreen").classList.add("hidden");
+    accountEl.classList.add("hidden");
+    readingEl.classList.add("hidden");
+    oilEl.classList.add("hidden");
+    vehicleInfoEl.classList.remove("hidden");
+    uvBackToScan();
+  } else if (tab === "account") {
+    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
+    document.getElementById("loginScreen").classList.add("hidden");
+    vehicleInfoEl.classList.add("hidden");
+    readingEl.classList.add("hidden");
+    oilEl.classList.add("hidden");
+    accountEl.classList.remove("hidden");
+    populateAccountScreen(op);
+    stopScanner();
+    uvStopScanner();
+  } else if (tab === "reading") {
+    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
+    document.getElementById("loginScreen").classList.add("hidden");
+    vehicleInfoEl.classList.add("hidden");
+    accountEl.classList.add("hidden");
+    oilEl.classList.add("hidden");
+    readingEl.classList.remove("hidden");
+    stopScanner();
+    uvStopScanner();
+    loadReadingPage();
+  } else if (tab === "oil") {
+    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
+    document.getElementById("loginScreen").classList.add("hidden");
+    vehicleInfoEl.classList.add("hidden");
+    accountEl.classList.add("hidden");
+    readingEl.classList.add("hidden");
+    oilEl.classList.remove("hidden");
+    stopScanner();
+    uvStopScanner();
+    oilResetToScan();
+  }
+
+  document.getElementById("bottomNav").classList.remove("hidden");
+  ["navHome", "navReading", "navOil", "navAccount"].forEach(id => document.getElementById(id).classList.remove("active"));
+  if (tab === "home") document.getElementById("navHome").classList.add("active");
+  if (tab === "reading") document.getElementById("navReading").classList.add("active");
+  if (tab === "oil") document.getElementById("navOil").classList.add("active");
+  if (tab === "account") document.getElementById("navAccount").classList.add("active");
+}
+
+/* Like showScreen but doesn't touch the bottom nav / vehicle / account tabs */
+function showScreenKeepingChrome(name) {
+  const screens = ["login", "scan", "loading", "vehicle", "success"];
+  screens.forEach(s => {
+    const el = document.getElementById(s + "Screen");
+    if (el) el.classList.toggle("hidden", s !== name);
+  });
+}
+
+function populateAccountScreen(op) {
+  document.getElementById("acName").textContent = op.name;
+  document.getElementById("acMobile").textContent = op.mobile;
+  document.getElementById("acId").textContent = op.xicId;
+  document.getElementById("pwError").innerHTML = "";
+  document.getElementById("pwSuccess").innerHTML = "";
+  document.getElementById("pwCurrent").value = "";
+  document.getElementById("pwNew").value = "";
+  document.getElementById("pwConfirm").value = "";
+}
+
+/* ============ PASSWORD SHOW/HIDE ============ */
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const show = input.type === "password";
+  input.type = show ? "text" : "password";
+  btn.textContent = show ? "🙈" : "👁️";
+}
+
 /* ============ LOGIN ============ */
 async function handleLogin() {
   const name = document.getElementById("loginName").value.trim();
   const mobile = document.getElementById("loginMobile").value.trim();
+  const idNumber = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("loginPassword").value;
   const errorBox = document.getElementById("loginError");
   errorBox.innerHTML = "";
 
   if (!name) { showError(errorBox, "Please enter your name."); return; }
   if (!mobile) { showError(errorBox, "Please enter your mobile number."); return; }
+  if (!idNumber) { showError(errorBox, "Please enter your ID number."); return; }
+  if (!password) { showError(errorBox, "Please enter your password."); return; }
 
   const btn = document.getElementById("loginBtn");
   btn.disabled = true;
   btn.textContent = "Logging in...";
 
   try {
-    // Check if operator already exists by mobile number
     const { data: existing, error: selectErr } = await sb
       .from("operator_login")
-      .select("name, mobile")
+      .select("name, mobile, XIC_ID, pass")
       .eq("mobile", mobile)
       .maybeSingle();
 
     if (selectErr) throw selectErr;
 
-    let finalName = name, finalMobile = mobile;
-
-    if (existing) {
-      finalName = existing.name;
-      finalMobile = existing.mobile;
-    } else {
+    if (!existing) {
+      // No operator with this mobile number yet - create a new record
+      // with the entered details and the default password.
       const { error: insertErr } = await sb
         .from("operator_login")
-        .insert({ name: name, mobile: mobile });
+        .insert({ name: name, mobile: mobile, XIC_ID: idNumber, pass: "1111" });
       if (insertErr) throw insertErr;
+
+      btn.disabled = false;
+      btn.textContent = "Login";
+      setOperator(name, mobile, idNumber);
+      showLoggedInHeader({ name });
+      document.getElementById("bottomNav").classList.remove("hidden");
+      showTab("home");
+      return;
+    }
+
+    if (String(existing.XIC_ID) !== String(idNumber)) {
+      btn.disabled = false;
+      btn.textContent = "Login";
+      showError(errorBox, "ID Number does not match.");
+      return;
+    }
+
+    if (String(existing.pass) !== String(password)) {
+      btn.disabled = false;
+      btn.textContent = "Login";
+      showError(errorBox, "Incorrect password. Please try again.");
+      return;
     }
 
     btn.disabled = false;
     btn.textContent = "Login";
-    setOperator(finalName, finalMobile);
-    showLoggedInHeader({ name: finalName, mobile: finalMobile });
-    showScreen("scan");
-    // Not auto-starting here either — this runs after an async network
-    // call, and some browsers (notably Safari) no longer treat that as
-    // a valid "user gesture" for camera access. Tapping Start Camera
-    // right after keeps it a fresh, reliable gesture.
+    setOperator(existing.name, existing.mobile, existing.XIC_ID);
+    showLoggedInHeader({ name: existing.name });
+    document.getElementById("bottomNav").classList.remove("hidden");
+    showTab("home");
+    // showTab("home") auto-starts the camera. If the browser blocks it
+    // (no permission yet, insecure context, etc.) startScanner() falls
+    // back to showing the manual "Start Camera" button.
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Login";
@@ -466,12 +1050,78 @@ async function handleLogin() {
   }
 }
 
+/* ============ CHANGE PASSWORD ============ */
+async function handleChangePassword() {
+  const errorBox = document.getElementById("pwError");
+  const successBox = document.getElementById("pwSuccess");
+  errorBox.innerHTML = "";
+  successBox.innerHTML = "";
+
+  const op = getOperator();
+  if (!op) { showError(errorBox, "Session expired. Please log in again."); logout(); return; }
+
+  const current = document.getElementById("pwCurrent").value;
+  const next = document.getElementById("pwNew").value;
+  const confirm = document.getElementById("pwConfirm").value;
+
+  if (!current) { showError(errorBox, "Please enter your current password."); return; }
+  if (!next) { showError(errorBox, "Please enter a new password."); return; }
+  if (next !== confirm) { showError(errorBox, "New passwords do not match."); return; }
+
+  const btn = document.getElementById("pwChangeBtn");
+  btn.disabled = true;
+  btn.textContent = "Updating...";
+
+  try {
+    const { data: row, error: selectErr } = await sb
+      .from("operator_login")
+      .select("pass")
+      .eq("mobile", op.mobile)
+      .eq("XIC_ID", op.xicId)
+      .maybeSingle();
+
+    if (selectErr) throw selectErr;
+    if (!row) { showError(errorBox, "Operator not found."); btn.disabled = false; btn.textContent = "Change Password"; return; }
+
+    if (String(row.pass) !== String(current)) {
+      showError(errorBox, "Current password is incorrect.");
+      btn.disabled = false;
+      btn.textContent = "Change Password";
+      return;
+    }
+
+    const { error: updateErr } = await sb
+      .from("operator_login")
+      .update({ pass: next })
+      .eq("mobile", op.mobile)
+      .eq("XIC_ID", op.xicId);
+
+    if (updateErr) throw updateErr;
+
+    btn.disabled = false;
+    btn.textContent = "Change Password";
+    document.getElementById("pwCurrent").value = "";
+    document.getElementById("pwNew").value = "";
+    document.getElementById("pwConfirm").value = "";
+    successBox.innerHTML = '<div class="info-row" style="background:var(--green-light);border-radius:10px;padding:12px 14px;color:var(--green-dark);font-weight:600;border-bottom:none;">Password updated successfully.</div>';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Change Password";
+    showError(errorBox, "Network error. Please try again.");
+    console.error(err);
+  }
+}
+
 function logout() {
   clearOperator();
   stopScanner();
+  uvStopScanner();
   currentVehicle = null;
   document.getElementById("loginName").value = "";
   document.getElementById("loginMobile").value = "";
+  document.getElementById("loginId").value = "";
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("loginError").innerHTML = "";
   showScreen("login");
 }
 
@@ -481,6 +1131,12 @@ function showError(box, msg) {
 
 /* ============ QR SCANNER ============ */
 async function startScanner() {
+  // Idempotency guard: if a scan session is already active, do nothing
+  // instead of trying to start a second overlapping session (which
+  // Html5Qrcode will reject/throw on).
+  if (html5QrCode && html5QrCode.getState && html5QrCode.getState() === 2 /* Html5QrcodeScannerState.SCANNING */) {
+    return;
+  }
   scanLocked = false;
   const statusEl = document.getElementById("scanStatus");
   const startWrap = document.getElementById("startCameraWrap");
@@ -557,10 +1213,19 @@ async function startScanner() {
 }
 
 function stopScanner() {
-  if (html5QrCode) {
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-    }).catch(() => {});
+  // .stop() can throw *synchronously* (not just reject) if the scanner
+  // isn't actively running/mid-transition on some html5-qrcode versions.
+  // Wrapped in try/catch so a stray throw here can never block whatever
+  // navigation call triggered this.
+  try {
+    if (html5QrCode) {
+      Promise.resolve(html5QrCode.stop())
+        .then(() => { try { html5QrCode.clear(); } catch (e) {} })
+        .catch(() => {})
+        .finally(() => { html5QrCode = null; });
+    }
+  } catch (e) {
+    html5QrCode = null;
   }
 }
 
@@ -821,6 +1486,17 @@ async function submitEntry() {
     // Note: latest_data is kept in sync automatically by a database
     // trigger on diesel_data — no extra client-side write needed here.
 
+    // Update the cumulative dispenser reading for the entry's date.
+    // This is supplementary tracking — if it fails for any reason, the
+    // diesel entry itself has already been saved successfully, so we
+    // don't want to interrupt or roll back the operator's flow.
+    try {
+      const entryDate = (data.entry_datetime || new Date().toISOString()).slice(0, 10);
+      await updateDispenserReading(entryDate, quantity);
+    } catch (readingErr) {
+      console.error("Dispenser reading update failed:", readingErr);
+    }
+
     btn.disabled = false;
     btn.textContent = "Save Diesel Entry";
     document.getElementById("sVehicle").textContent = data.vehicle_name;
@@ -836,6 +1512,651 @@ async function submitEntry() {
   }
 }
 
+/* ============ DIESEL RECEIVED COUNT (Home stat card) ============ */
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function todayRangeISO() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { startISO: start.toISOString(), endISO: end.toISOString() };
+}
+
+async function refreshDieselReceivedCount() {
+  const el = document.getElementById("dieselReceivedCount");
+  if (!el) return;
+  try {
+    const { startISO, endISO } = todayRangeISO();
+    const { data, error } = await sb
+      .from("diesel_data")
+      .select("code")
+      .gte("entry_datetime", startISO)
+      .lt("entry_datetime", endISO);
+
+    if (error) throw error;
+    const uniqueVehicles = new Set((data || []).map(r => r.code));
+    el.textContent = uniqueVehicles.size + " Vehicles";
+  } catch (err) {
+    el.textContent = "- Vehicles";
+    console.error("Failed to load diesel received count:", err);
+  }
+}
+
+/* ============ DISPENSER METER READING ============ */
+// Maintains exactly one row per date in dispenser_meter_reading:
+// each diesel entry adds its quantity onto that date's running total,
+// starting from the most recent prior date's total when a new date begins.
+async function updateDispenserReading(entryDate, quantity) {
+  const { data: existingRow, error: selectErr } = await sb
+    .from("dispenser_meter_reading")
+    .select("last_meter_reading")
+    .eq("date", entryDate)
+    .maybeSingle();
+
+  if (selectErr) throw selectErr;
+
+  if (existingRow) {
+    const updated = Number(existingRow.last_meter_reading) + Number(quantity);
+    const { error: updateErr } = await sb
+      .from("dispenser_meter_reading")
+      .update({ last_meter_reading: updated })
+      .eq("date", entryDate);
+    if (updateErr) throw updateErr;
+    return updated;
+  }
+
+  const { data: prevRow, error: prevErr } = await sb
+    .from("dispenser_meter_reading")
+    .select("last_meter_reading")
+    .lt("date", entryDate)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (prevErr) throw prevErr;
+
+  const previousReading = prevRow ? Number(prevRow.last_meter_reading) : 0;
+  const newReading = previousReading + Number(quantity);
+
+  const { error: insertErr } = await sb
+    .from("dispenser_meter_reading")
+    .insert({ date: entryDate, last_meter_reading: newReading });
+  if (insertErr) throw insertErr;
+
+  return newReading;
+}
+
+let currentExpectedReading = null;
+
+async function loadReadingPage() {
+  const today = todayStr();
+  document.getElementById("rDate").textContent = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+  document.getElementById("rExpected").textContent = "…";
+  document.getElementById("rExpected2").textContent = "…";
+  document.getElementById("rStarting").textContent = "…";
+  document.getElementById("rDispensed").textContent = "…";
+  document.getElementById("rDiffResult").innerHTML = "";
+  document.getElementById("rActualInput").value = "";
+
+  try {
+    // Total dispensed today, from the source-of-truth diesel_data table.
+    const { startISO, endISO } = todayRangeISO();
+    const { data: todaysEntries, error: entriesErr } = await sb
+      .from("diesel_data")
+      .select("quantity")
+      .gte("entry_datetime", startISO)
+      .lt("entry_datetime", endISO);
+    if (entriesErr) throw entriesErr;
+    const dispensedToday = (todaysEntries || []).reduce((sum, r) => sum + Number(r.quantity || 0), 0);
+
+    // Today's cumulative row, if any diesel has been recorded today yet.
+    const { data: todayRow, error: todayErr } = await sb
+      .from("dispenser_meter_reading")
+      .select("last_meter_reading")
+      .eq("date", today)
+      .maybeSingle();
+    if (todayErr) throw todayErr;
+
+    let expected;
+    if (todayRow) {
+      expected = Number(todayRow.last_meter_reading);
+    } else {
+      // No entries yet today — expected reading is just whatever the
+      // most recent prior day ended on (starting reading = expected).
+      const { data: prevRow, error: prevErr } = await sb
+        .from("dispenser_meter_reading")
+        .select("last_meter_reading")
+        .lt("date", today)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (prevErr) throw prevErr;
+      expected = prevRow ? Number(prevRow.last_meter_reading) : 0;
+    }
+
+    const startingReading = expected - dispensedToday;
+    currentExpectedReading = expected;
+
+    document.getElementById("rExpected").textContent = expected.toLocaleString();
+    document.getElementById("rExpected2").textContent = expected.toLocaleString() + " L";
+    document.getElementById("rStarting").textContent = startingReading.toLocaleString() + " L";
+    document.getElementById("rDispensed").textContent = dispensedToday.toLocaleString() + " L";
+  } catch (err) {
+    document.getElementById("rExpected").textContent = "N/A";
+    document.getElementById("rExpected2").textContent = "N/A";
+    document.getElementById("rStarting").textContent = "N/A";
+    document.getElementById("rDispensed").textContent = "N/A";
+    console.error("Failed to load reading page:", err);
+  }
+}
+
+function checkReadingDifference() {
+  const resultBox = document.getElementById("rDiffResult");
+  const actualVal = parseFloat(document.getElementById("rActualInput").value);
+
+  if (isNaN(actualVal)) {
+    resultBox.innerHTML = '<div class="error-msg">Please enter the actual dispenser reading.</div>';
+    return;
+  }
+  if (currentExpectedReading === null) {
+    resultBox.innerHTML = '<div class="error-msg">Expected reading isn\'t available yet. Please try again.</div>';
+    return;
+  }
+
+  const diff = actualVal - currentExpectedReading;
+  if (diff === 0) {
+    resultBox.innerHTML = '<div class="diff-badge diff-match">✅ Matches — No Difference</div>';
+  } else {
+    const sign = diff > 0 ? "+" : "";
+    resultBox.innerHTML =
+      '<div class="diff-badge diff-mismatch">⚠️ Difference: ' + sign + diff.toLocaleString() + ' L</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Actual (' + actualVal.toLocaleString() +
+      ' L) minus Expected (' + currentExpectedReading.toLocaleString() + ' L)</div>';
+  }
+}
+
+/* ============ OIL TRACKER ============ */
+const OIL_TYPES = [
+  { key: "hydraulic_oil", label: "Hydraulic Oil" },
+  { key: "engine_oil", label: "Engine Oil" },
+  { key: "gear_oil", label: "Gear Oil" },
+  { key: "transmission_oil", label: "Transmission Oil" },
+  { key: "brake_oil", label: "Brake Oil" },
+  { key: "grease", label: "Grease" }
+];
+const OIL_QTY_OPTS = [0, 6, 10];
+
+let oilHtml5Qr = null;
+let oilScanLocked = false;
+let oilCurrentVehicle = null; // { code, vehicle_name }
+let oilMatchedDriver = null;  // { name, idOrMobile }
+let oilSelectedPurpose = null;
+let oilQtyValues = {}; // { hydraulic_oil: 0, engine_oil: 6, ... }
+let oilRowsBuilt = false;
+
+/* ---- Scanner (own instance, separate from Diesel + Vehicle-Info scanners) ---- */
+async function oilStartScanner() {
+  if (oilHtml5Qr && oilHtml5Qr.getState && oilHtml5Qr.getState() === 2 /* SCANNING */) return;
+
+  const statusEl = document.getElementById("oilScanStatus");
+  const ctaWrap = document.getElementById("oilScanCtaWrap");
+  oilScanLocked = false;
+  statusEl.textContent = "Requesting camera access...";
+
+  if (!window.isSecureContext) { statusEl.textContent = "Camera blocked: open this page over HTTPS (or localhost)."; return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { statusEl.textContent = "Camera not supported. Use manual entry below."; return; }
+
+  ctaWrap.style.display = "none";
+  const readerEl = document.getElementById("oil-qr-reader");
+  readerEl.innerHTML = "";
+  if (!oilHtml5Qr) oilHtml5Qr = new Html5Qrcode("oil-qr-reader");
+  const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+  const onSuccess = (decodedText) => {
+    if (oilScanLocked) return;
+    oilScanLocked = true;
+    statusEl.textContent = "Code detected: " + decodedText;
+    oilStopScanner();
+    oilLookupVehicle(decodedText.trim().toUpperCase());
+  };
+  const onFailure = () => {};
+
+  try {
+    await oilHtml5Qr.start({ facingMode: "environment" }, config, onSuccess, onFailure);
+    statusEl.textContent = "Point camera at the QR code";
+    return;
+  } catch (err) { console.warn(err); }
+
+  try {
+    const cams = await Html5Qrcode.getCameras();
+    if (!cams || cams.length === 0) { statusEl.textContent = "No camera found."; ctaWrap.style.display = "block"; return; }
+    const back = cams.find(c => /back|rear|environment/i.test(c.label)) || cams[0];
+    await oilHtml5Qr.start({ deviceId: { exact: back.id } }, config, onSuccess, onFailure);
+    statusEl.textContent = "Point camera at the QR code";
+  } catch (err) {
+    console.error(err);
+    const n = err && err.name;
+    statusEl.textContent = n === "NotAllowedError" ? "Camera permission denied." :
+      n === "NotFoundError" ? "No camera found." :
+      n === "NotReadableError" ? "Camera already in use by another app." : "Camera not available.";
+    ctaWrap.style.display = "block";
+  }
+}
+
+function oilStopScanner() {
+  try {
+    if (oilHtml5Qr) {
+      Promise.resolve(oilHtml5Qr.stop())
+        .then(() => { try { oilHtml5Qr.clear(); } catch (e) {} })
+        .catch(() => {})
+        .finally(() => { oilHtml5Qr = null; });
+    }
+  } catch (e) {
+    oilHtml5Qr = null;
+  }
+}
+
+function oilToggleManual() {
+  document.getElementById("oilManualEntry").classList.toggle("hidden");
+}
+
+function oilHideManualSuggestions() {
+  const el = document.getElementById("oilManualSuggestions");
+  el.classList.add("hidden");
+  el.innerHTML = "";
+}
+
+async function oilOnManualInput() {
+  const val = document.getElementById("oilManualCode").value.trim();
+  const box = document.getElementById("oilManualSuggestions");
+  if (!val) { oilHideManualSuggestions(); return; }
+
+  const list = await loadVehicleListCache();
+  const matches = smartVehicleMatch(list, val, 8);
+
+  if (!matches || matches.length === 0) { oilHideManualSuggestions(); return; }
+
+  box.innerHTML = matches.map(v =>
+    '<div class="sug-item" data-code="' + escapeHtml(v.code) + '"><strong>' + escapeHtml(v.vehicle_name) + '</strong> — <span class="vc-code">' + escapeHtml(v.code) + '</span></div>'
+  ).join("");
+  box.classList.remove("hidden");
+
+  box.querySelectorAll(".sug-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const code = item.getAttribute("data-code");
+      document.getElementById("oilManualCode").value = code;
+      oilHideManualSuggestions();
+      oilStopScanner();
+      oilLookupVehicle(code);
+    });
+  });
+}
+
+function oilSubmitManualCode() {
+  const raw = document.getElementById("oilManualCode").value.trim();
+  if (!raw) return;
+  oilHideManualSuggestions();
+  oilStopScanner();
+  oilLookupVehicleByCodeOrName(raw);
+}
+
+/* ---- Resolve a manually typed value that may be a code, a name, or a
+   shorthand like "F12" / "FL12" / "DT6986" — reuses the same smart matcher
+   that powers the live suggestions, so typing + pressing the button behave
+   consistently. ---- */
+async function oilLookupVehicleByCodeOrName(raw) {
+  const statusEl = document.getElementById("oilScanStatus");
+  statusEl.textContent = "Looking up vehicle...";
+  try {
+    const list = await loadVehicleListCache();
+    const matches = smartVehicleMatch(list, raw, 5);
+
+    if (matches.length === 1) {
+      oilLookupVehicle(matches[0].code);
+      return;
+    }
+    if (matches.length > 1) {
+      statusEl.textContent = "Multiple matches found — please pick one from the suggestions.";
+      document.getElementById("oilScanCtaWrap").style.display = "block";
+      oilOnManualInput();
+      return;
+    }
+    // No match at all — fall back to treating it as a literal code lookup.
+    oilLookupVehicle(raw.replace(/\s+/g, "").toUpperCase());
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Network error while looking up vehicle.";
+    document.getElementById("oilScanCtaWrap").style.display = "block";
+  }
+}
+
+/* ---- Vehicle lookup (reuses the existing "master" table — same as Diesel) ---- */
+async function oilLookupVehicle(code) {
+  const statusEl = document.getElementById("oilScanStatus");
+  statusEl.textContent = "Looking up vehicle...";
+  try {
+    const { data: vehicle, error } = await sb.from("master").select("code, vehicle_name").eq("code", code).maybeSingle();
+    if (error) throw error;
+    if (!vehicle) {
+      statusEl.textContent = "Vehicle not found for code: " + code;
+      document.getElementById("oilScanCtaWrap").style.display = "block";
+      return;
+    }
+
+    oilCurrentVehicle = { code: vehicle.code, vehicle_name: vehicle.vehicle_name };
+    document.getElementById("oilVehicleName").textContent = vehicle.vehicle_name;
+    document.getElementById("oilVehicleCode").textContent = vehicle.code;
+
+    oilBuildQtyRows();
+    oilResetForm();
+    await oilLoadLatestOil(vehicle.code);
+
+    document.getElementById("oilScanBlock").classList.add("hidden");
+    document.getElementById("oilSuccessBlock").classList.add("hidden");
+    document.getElementById("oilFormBlock").classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Network error while looking up vehicle.";
+    document.getElementById("oilScanCtaWrap").style.display = "block";
+  }
+}
+
+/* ---- Human-readable "time since" for a single oil type's change date.
+   Distinct from the diesel timeSince() helper: diesel always shows
+   Days/Hours/Minutes together, but oil changes can be months apart, so this
+   scales the units to whatever is actually meaningful (minutes -> hours ->
+   days -> months). Returns null when there's no date at all. ---- */
+function oilTimeSinceLabel(dateStr) {
+  if (!dateStr) return null;
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  if (diffMs < 0) return "Just now";
+
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 60) {
+    return minutes <= 1 ? "Just now" : minutes + " minutes";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remMinutes = minutes % 60;
+  if (hours < 24) {
+    return remMinutes > 0 ? hours + " hour" + (hours !== 1 ? "s" : "") + " " + remMinutes + " minute" + (remMinutes !== 1 ? "s" : "")
+                           : hours + " hour" + (hours !== 1 ? "s" : "");
+  }
+
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  if (days < 2) {
+    return remHours > 0 ? days + " day" + (days !== 1 ? "s" : "") + " " + remHours + " hour" + (remHours !== 1 ? "s" : "")
+                         : days + " day" + (days !== 1 ? "s" : "");
+  }
+  if (days < 30) {
+    return days + " days";
+  }
+
+  const months = Math.floor(days / 30);
+  const remDays = days % 30;
+  return remDays > 0 ? months + " month" + (months !== 1 ? "s" : "") + " " + remDays + " day" + (remDays !== 1 ? "s" : "")
+                      : months + " month" + (months !== 1 ? "s" : "");
+}
+
+async function oilLoadLatestOil(code) {
+  const card = document.getElementById("oilLatestCard");
+  const box = document.getElementById("oilLatestInfo");
+  card.classList.remove("hidden"); // always visible so the user can see whether it's empty vs. broken
+  box.innerHTML = '<div class="scan-status" style="padding:6px 0;">Loading last oil record...</div>';
+  try {
+    const { data, error } = await sb.from("latest_oil_data").select("*").eq("code", code).maybeSingle();
+    if (error) throw error;
+
+    // One row per oil type: type name, quantity from its own last change,
+    // and time since that change — each independent of the other types.
+    const rows = OIL_TYPES.map(t => {
+      const qty = data ? data[t.key] : null;
+      const changeDate = data ? data[t.key + "_change_date"] : null;
+      const sinceLabel = oilTimeSinceLabel(changeDate);
+      const unit = t.key === "grease" ? "KG" : "L";
+      return (
+        '<div class="oil-latest-row">' +
+          '<div>' +
+            '<div class="oil-latest-name">' + t.label + '</div>' +
+            '<div class="oil-latest-meta">' + (sinceLabel ? sinceLabel + " ago" : "No previous record") + '</div>' +
+          '</div>' +
+          '<div class="oil-latest-qty">' + (sinceLabel && qty != null ? Number(qty) + " " + unit : "—") + '</div>' +
+        '</div>'
+      );
+    }).join("");
+
+    box.innerHTML = rows;
+  } catch (err) {
+    console.error("Failed to load latest oil data:", err);
+    box.innerHTML = '<div class="scan-status" style="padding:6px 0;color:var(--red);">Could not load last oil record.</div>';
+  }
+}
+
+/* ---- Oil quantity rows (quick-select 0 / 6 / 10 / Other) ---- */
+function oilBuildQtyRows() {
+  if (oilRowsBuilt) return;
+  const container = document.getElementById("oilRowsContainer");
+  container.innerHTML = OIL_TYPES.map(t => `
+    <div class="oil-row">
+      <div class="oil-row-label">${t.label}</div>
+      <div class="qty-btns" id="oilQtyBtns_${t.key}">
+        ${OIL_QTY_OPTS.map(n => `<button type="button" class="qty-btn${n === 0 ? " sel" : ""}" data-val="${n}" onclick="oilSelectQty('${t.key}', ${n})">${n}</button>`).join("")}
+        <input type="number" class="qty-other-input" id="oilOther_${t.key}" placeholder="Other" min="0" step="0.5" oninput="oilOtherQtyInput('${t.key}')">
+      </div>
+    </div>
+  `).join("");
+  OIL_TYPES.forEach(t => { oilQtyValues[t.key] = 0; });
+  oilRowsBuilt = true;
+}
+
+function oilSelectQty(key, val) {
+  oilQtyValues[key] = val;
+  document.getElementById("oilOther_" + key).value = "";
+  document.querySelectorAll("#oilQtyBtns_" + key + " .qty-btn").forEach(b => {
+    b.classList.toggle("sel", parseFloat(b.getAttribute("data-val")) === val);
+  });
+}
+
+function oilOtherQtyInput(key) {
+  const input = document.getElementById("oilOther_" + key);
+  const v = parseFloat(input.value);
+  oilQtyValues[key] = isNaN(v) ? 0 : v;
+  document.querySelectorAll("#oilQtyBtns_" + key + " .qty-btn").forEach(b => b.classList.remove("sel"));
+}
+
+/* ---- Purpose ---- */
+function oilSelectPurpose(purpose) {
+  oilSelectedPurpose = purpose;
+  document.querySelectorAll("#oilPurposeBtns .purpose-btn").forEach(b => {
+    b.classList.toggle("sel", b.getAttribute("data-purpose") === purpose);
+  });
+}
+
+/* ---- Driver lookup (identical logic/table to the Diesel driver search) ---- */
+async function oilSearchDriver() {
+  const val = document.getElementById("oilDriverLookup").value.trim();
+  const statusEl = document.getElementById("oilDriverStatus");
+  const nameField = document.getElementById("oilDriverName");
+  const box = document.getElementById("oilDriverSuggestions");
+
+  oilMatchedDriver = null;
+  nameField.value = "";
+
+  if (!val) { statusEl.innerHTML = ""; hideSuggestions("oilDriverSuggestions"); return; }
+
+  statusEl.innerHTML = '<span style="color:var(--muted);">Searching...</span>';
+
+  try {
+    const { data, error } = await sb
+      .from("driver_information")
+      .select("name, driver_id, driver_mobile_number")
+      .or("driver_id.ilike.%" + val + "%,driver_mobile_number.ilike.%" + val + "%,name.ilike.%" + val + "%")
+      .limit(6);
+
+    if (error) throw error;
+    const results = data || [];
+
+    const exact = results.find(d =>
+      d.driver_id.toLowerCase() === val.toLowerCase() ||
+      d.driver_mobile_number.toLowerCase() === val.toLowerCase()
+    );
+
+    if (exact) {
+      oilMatchedDriver = { name: exact.name, idOrMobile: val };
+      nameField.value = exact.name;
+      statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
+      hideSuggestions("oilDriverSuggestions");
+      return;
+    }
+
+    if (results.length === 0) {
+      statusEl.innerHTML = '<span style="color:var(--red);font-weight:600;">Driver not found. Please check Driver ID/Mobile Number.</span>';
+      hideSuggestions("oilDriverSuggestions");
+      return;
+    }
+
+    statusEl.innerHTML = '<span style="color:var(--muted);">Select a matching driver below, or keep typing.</span>';
+    box.innerHTML = results.map(d =>
+      '<div class="sug-item" data-id="' + escapeHtml(d.driver_id) + '" data-mobile="' + escapeHtml(d.driver_mobile_number) + '" data-name="' + escapeHtml(d.name) + '">' +
+      '<strong>' + escapeHtml(d.name) + '</strong>' +
+      '<span class="sug-sub">' + escapeHtml(d.driver_id) + ' · ' + escapeHtml(d.driver_mobile_number) + '</span>' +
+      '</div>'
+    ).join("");
+    box.classList.remove("hidden");
+
+    box.querySelectorAll(".sug-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const idVal = item.getAttribute("data-id");
+        document.getElementById("oilDriverLookup").value = idVal;
+        oilMatchedDriver = { name: item.getAttribute("data-name"), idOrMobile: idVal };
+        nameField.value = item.getAttribute("data-name");
+        statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
+        hideSuggestions("oilDriverSuggestions");
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    statusEl.innerHTML = '<span style="color:var(--red);">Network error while searching driver.</span>';
+  }
+}
+
+/* ---- Reset helpers ---- */
+function oilResetForm() {
+  oilMatchedDriver = null;
+  oilSelectedPurpose = null;
+  document.getElementById("oilDriverLookup").value = "";
+  document.getElementById("oilDriverName").value = "";
+  document.getElementById("oilDriverStatus").innerHTML = "";
+  hideSuggestions("oilDriverSuggestions");
+  document.getElementById("oilMeterReading").value = "";
+  document.getElementById("oilEntryError").innerHTML = "";
+  document.querySelectorAll("#oilPurposeBtns .purpose-btn").forEach(b => b.classList.remove("sel"));
+  OIL_TYPES.forEach(t => {
+    oilQtyValues[t.key] = 0;
+    const otherInput = document.getElementById("oilOther_" + t.key);
+    if (otherInput) otherInput.value = "";
+    document.querySelectorAll("#oilQtyBtns_" + t.key + " .qty-btn").forEach(b => {
+      b.classList.toggle("sel", parseFloat(b.getAttribute("data-val")) === 0);
+    });
+  });
+}
+
+function oilResetToScan() {
+  oilStopScanner();
+  oilCurrentVehicle = null;
+  oilResetForm();
+  document.getElementById("oilManualCode").value = "";
+  document.getElementById("oilManualEntry").classList.add("hidden");
+  oilHideManualSuggestions();
+  document.getElementById("oilScanStatus").textContent = "";
+  document.getElementById("oilScanCtaWrap").style.display = "block";
+  document.getElementById("oilLatestCard").classList.add("hidden");
+  document.getElementById("oilLatestInfo").innerHTML = "";
+  document.getElementById("oilFormBlock").classList.add("hidden");
+  document.getElementById("oilSuccessBlock").classList.add("hidden");
+  document.getElementById("oilScanBlock").classList.remove("hidden");
+}
+
+/* ---- Submit ---- */
+async function oilSubmitEntry() {
+  const errorBox = document.getElementById("oilEntryError");
+  errorBox.innerHTML = "";
+
+  const op = getOperator();
+  if (!op) { showError(errorBox, "Session expired. Please log in again."); logout(); return; }
+  if (!oilCurrentVehicle) { showError(errorBox, "Please scan a vehicle first."); return; }
+  if (!oilMatchedDriver) { showError(errorBox, "Please enter a valid Driver ID/Mobile Number that matches a known driver."); return; }
+  if (!oilSelectedPurpose) { showError(errorBox, "Please select a Purpose (Scheduled or Loss Oil)."); return; }
+
+  const meterReading = parseFloat(document.getElementById("oilMeterReading").value);
+  if (isNaN(meterReading) || meterReading < 0) { showError(errorBox, "Please enter a valid meter reading."); return; }
+
+  const hasAnyOil = OIL_TYPES.some(t => Number(oilQtyValues[t.key]) > 0);
+  if (!hasAnyOil) { showError(errorBox, "Please enter at least one oil quantity."); return; }
+
+  const btn = document.getElementById("oilSaveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  try {
+    const payload = {
+      code: oilCurrentVehicle.code,
+      vehicle_name: oilCurrentVehicle.vehicle_name,
+      purpose: oilSelectedPurpose,
+      meter_reading: meterReading,
+      driver_id_mobile: oilMatchedDriver.idOrMobile,
+      driver_name: oilMatchedDriver.name
+    };
+    OIL_TYPES.forEach(t => { payload[t.key] = Number(oilQtyValues[t.key]) || 0; });
+
+    // 1. Historical record — every submission is its own permanent row.
+    //    latest_oil_data is kept in sync automatically by a database
+    //    trigger on oil_data (mirrors how latest_data is kept in sync from
+    //    diesel_data) — no extra client-side write needed here. The trigger
+    //    only advances a given oil type's quantity/change-date when that
+    //    type was actually serviced in this entry, so topping up e.g. just
+    //    hydraulic oil won't reset the recorded date for the others.
+    const { data: inserted, error: insertErr } = await sb
+      .from("oil_data")
+      .insert(payload)
+      .select()
+      .single();
+    if (insertErr) throw insertErr;
+
+    btn.disabled = false;
+    btn.textContent = "Save Oil Entry";
+
+    const summaryRows = OIL_TYPES
+      .filter(t => Number(payload[t.key]) > 0)
+      .map(t => '<div class="success-row"><div class="label">' + t.label + '</div><div class="value">' + payload[t.key] + ' L</div></div>')
+      .join("");
+    document.getElementById("oilSuccessSummary").innerHTML =
+      '<div class="success-row"><div class="label">Vehicle</div><div class="value">' + escapeHtml(oilCurrentVehicle.vehicle_name) + '</div></div>' +
+      summaryRows +
+      '<div class="success-row"><div class="label">Purpose</div><div class="value">' + escapeHtml(oilSelectedPurpose) + '</div></div>' +
+      '<div class="success-row"><div class="label">Meter Reading</div><div class="value">' + meterReading + '</div></div>' +
+      '<div class="success-row"><div class="label">Driver</div><div class="value">' + escapeHtml(oilMatchedDriver.name) + '</div></div>';
+
+    document.getElementById("oilFormBlock").classList.add("hidden");
+    document.getElementById("oilSuccessBlock").classList.remove("hidden");
+    oilCurrentVehicle = null;
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Save Oil Entry";
+    const detail = (err && (err.message || err.details || err.hint)) || "Please try again.";
+    showError(errorBox, "Could not save oil entry: " + detail);
+    console.error(err);
+  }
+}
+
 /* ============ NAVIGATION ============ */
 function cancelToScan() {
   currentVehicle = null;
@@ -844,6 +2165,7 @@ function cancelToScan() {
   hideSuggestions("manualCodeSuggestions");
   showScreen("scan");
   startScanner();
+  refreshDieselReceivedCount();
 }
 
 /* ============ UTIL ============ */
@@ -851,6 +2173,183 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+/* ============ VEHICLE INFO PAGE (full-screen, reached via + tab) ============ */
+let uvHtml5Qr = null, uvScanLocked = false;
+
+function uvBackToScan() {
+  document.getElementById("uvDetailScreen").classList.add("hidden");
+  document.getElementById("uvScanScreen").classList.remove("hidden");
+  document.getElementById("uvStartCameraWrap").style.display = "block";
+  document.getElementById("uvScanStatus").textContent = "";
+  document.getElementById("uvSearchInput").value = "";
+  uvHideSuggestions();
+}
+
+function uvHideSuggestions() {
+  const el = document.getElementById("uvSearchSuggestions");
+  el.classList.add("hidden");
+  el.innerHTML = "";
+}
+
+async function uvOnSearchInput() {
+  const val = document.getElementById("uvSearchInput").value.trim();
+  const box = document.getElementById("uvSearchSuggestions");
+  if (!val) { uvHideSuggestions(); return; }
+
+  const list = await loadVehicleListCache();
+  const matches = smartVehicleMatch(list, val, 8);
+
+  if (!matches || matches.length === 0) { uvHideSuggestions(); return; }
+
+  box.innerHTML = matches.map(v =>
+    '<div class="sug-item" data-code="' + escapeHtml(v.code) + '"><strong>' + escapeHtml(v.vehicle_name) + '</strong> — <span class="vc-code">' + escapeHtml(v.code) + '</span></div>'
+  ).join("");
+  box.classList.remove("hidden");
+
+  box.querySelectorAll(".sug-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const code = item.getAttribute("data-code");
+      uvHideSuggestions();
+      uvStopScanner();
+      uvLookupVehicle(code);
+    });
+  });
+}
+
+async function uvStartScanner() {
+  const statusEl = document.getElementById("uvScanStatus");
+  const startWrap = document.getElementById("uvStartCameraWrap");
+  startWrap.style.display = "none";
+  statusEl.textContent = "Requesting camera access...";
+  uvScanLocked = false;
+
+  if (!window.isSecureContext) { statusEl.textContent = "Camera blocked: open this page over HTTPS (or localhost)."; return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { statusEl.textContent = "Camera not supported. Use search below."; return; }
+
+  const readerEl = document.getElementById("uv-qr-reader");
+  readerEl.innerHTML = "";
+  if (!uvHtml5Qr) uvHtml5Qr = new Html5Qrcode("uv-qr-reader");
+  const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+  const onSuccess = (decodedText) => {
+    if (uvScanLocked) return;
+    uvScanLocked = true;
+    statusEl.textContent = "Code detected: " + decodedText;
+    uvStopScanner();
+    uvLookupVehicle(decodedText.trim().toUpperCase());
+  };
+  const onFailure = () => {};
+
+  try {
+    await uvHtml5Qr.start({ facingMode: "environment" }, config, onSuccess, onFailure);
+    statusEl.textContent = "Point camera at the QR code";
+    return;
+  } catch (err) { console.warn(err); }
+
+  try {
+    const cams = await Html5Qrcode.getCameras();
+    if (!cams || cams.length === 0) { statusEl.textContent = "No camera found."; return; }
+    const back = cams.find(c => /back|rear|environment/i.test(c.label)) || cams[0];
+    await uvHtml5Qr.start({ deviceId: { exact: back.id } }, config, onSuccess, onFailure);
+    statusEl.textContent = "Point camera at the QR code";
+  } catch (err) {
+    console.error(err);
+    const n = err && err.name;
+    statusEl.textContent = n === "NotAllowedError" ? "Camera permission denied." :
+      n === "NotFoundError" ? "No camera found." :
+      n === "NotReadableError" ? "Camera already in use by another app." : "Camera not available.";
+    startWrap.style.display = "block";
+  }
+}
+
+function uvStopScanner() {
+  // Same defensive wrapping as stopScanner() above — a synchronous throw
+  // here must never be allowed to abort the caller (showTab navigation).
+  try {
+    if (uvHtml5Qr) {
+      Promise.resolve(uvHtml5Qr.stop())
+        .then(() => { try { uvHtml5Qr.clear(); } catch (e) {} })
+        .catch(() => {})
+        .finally(() => { uvHtml5Qr = null; });
+    }
+  } catch (e) {
+    uvHtml5Qr = null;
+  }
+}
+
+function uvStatusBadgeHtml(status) {
+  const cls = status === "Breakdown" ? "vstatus-breakdown" : status === "Work in Progress" ? "vstatus-wip" : "vstatus-running";
+  const icon = status === "Breakdown" ? "⛔" : status === "Work in Progress" ? "🛠️" : "✅";
+  return '<span class="vstatus-badge ' + cls + '">' + icon + ' ' + escapeHtml(status || "Running") + '</span>';
+}
+
+function uvInfoRows(pairs) {
+  return pairs.map(p => '<div class="info-row"><div class="label">' + escapeHtml(p[0]) + '</div><div class="value">' + escapeHtml(p[1]) + '</div></div>').join("");
+}
+
+async function uvLookupVehicle(code) {
+  document.getElementById("uvScanScreen").classList.add("hidden");
+  document.getElementById("uvDetailScreen").classList.remove("hidden");
+  document.getElementById("uvVehicleName").textContent = "Loading...";
+  document.getElementById("uvCurrentDriver").innerHTML = "";
+  document.getElementById("uvLastDriver").innerHTML = "";
+  document.getElementById("uvMechanics").innerHTML = "";
+
+  try {
+    const { data: vehicle, error: mErr } = await sb.from("master").select("code, vehicle_name").eq("code", code).maybeSingle();
+    if (mErr) throw mErr;
+    if (!vehicle) {
+      document.getElementById("uvVehicleName").textContent = "Vehicle not found";
+      document.getElementById("uvVehicleCode").textContent = code;
+      return;
+    }
+
+    const { data: latest } = await sb.from("latest_data").select("status, location").eq("code", code).maybeSingle();
+
+    const { data: duties } = await sb.from("duty_records")
+      .select("driver_name, driver_mobile, driver_id, duty_start, duty_end")
+      .eq("code", code).order("duty_start", { ascending: false }).limit(5);
+    const currentDuty = (duties || []).find(d => !d.duty_end);
+    const lastDuty = (duties || []).find(d => d.duty_end);
+
+    const { data: activeMechs } = await sb.from("mechanic_work_history")
+      .select("mechanic_name, mechanic_mobile_number, work_start_time")
+      .eq("vehicle_code", code).is("work_end_time", null);
+
+    document.getElementById("uvVehicleName").textContent = vehicle.vehicle_name;
+    document.getElementById("uvVehicleCode").textContent = vehicle.code;
+    document.getElementById("uvStatusBadge").innerHTML = uvStatusBadgeHtml(latest ? latest.status : "Running");
+    document.getElementById("uvLocation").textContent = (latest && latest.location) || "N/A";
+
+    document.getElementById("uvCurrentDriver").innerHTML = currentDuty
+      ? uvInfoRows([["Name", currentDuty.driver_name], ["Mobile", currentDuty.driver_mobile], ["Driver ID", currentDuty.driver_id || "N/A"], ["Duty Start", new Date(currentDuty.duty_start).toLocaleString()]])
+      : '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No driver currently on duty</div>';
+
+    document.getElementById("uvLastDriver").innerHTML = lastDuty
+      ? uvInfoRows([["Name", lastDuty.driver_name], ["Mobile", lastDuty.driver_mobile], ["Driver ID", lastDuty.driver_id || "N/A"], ["Duty End", new Date(lastDuty.duty_end).toLocaleString()]])
+      : '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No previous duty record</div>';
+
+    const mechCard = document.getElementById("uvMechanicCard");
+    if (activeMechs && activeMechs.length > 0) {
+      document.getElementById("uvMechanics").innerHTML = activeMechs.map((m, i) => {
+        const durationMs = new Date() - new Date(m.work_start_time);
+        const h = Math.floor(durationMs / 3600000), mnt = Math.floor((durationMs % 3600000) / 60000);
+        return uvInfoRows([
+          ["Mechanic " + (i + 1), m.mechanic_name],
+          ["Mobile", m.mechanic_mobile_number],
+          ["Start Time", new Date(m.work_start_time).toLocaleString()],
+          ["Duration", h + "h " + mnt + "m"]
+        ]);
+      }).join('<div style="height:10px;"></div>');
+    } else {
+      document.getElementById("uvMechanics").innerHTML = '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No active mechanic</div>';
+    }
+    mechCard.classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+    document.getElementById("uvVehicleName").textContent = "Error loading vehicle";
+  }
 }
 </script>
 </body>
