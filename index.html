@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Forklift Diesel Tracker</title>
+<title>Diesel Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -290,7 +290,7 @@
 <div class="app">
   <header>
     <div>
-      <h1>Forklift Diesel Tracker</h1>
+      <h1>Diesel Tracker</h1>
       <div class="sub" id="headerSub">Field Operations</div>
     </div>
   </header>
@@ -338,7 +338,7 @@
       </div>
       <div class="card">
         <div class="section-title">
-          <span>Scan Forklift QR Code</span>
+          <span>Scan QR Code</span>
         </div>
         <div id="qr-reader"></div>
         <div id="startCameraWrap" style="text-align:center;padding:20px 0;">
@@ -441,7 +441,7 @@
           <div class="success-row"><div class="label">Operator</div><div class="value" id="sOperator">-</div></div>
           <div class="success-row"><div class="label">Time</div><div class="value">Auto recorded</div></div>
         </div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next Forklift</button>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="cancelToScan()">Scan Next QR</button>
       </div>
     </div>
 
@@ -573,11 +573,11 @@
           </div>
           <div id="oil-qr-reader" style="margin-top:14px;"></div>
           <div class="scan-status" id="oilScanStatus"></div>
-          <div class="manual-toggle" onclick="oilToggleManual()">Enter code manually instead</div>
+          <div class="manual-toggle" onclick="oilToggleManual()">Enter manually instead</div>
           <div id="oilManualEntry" class="hidden" style="margin-top:14px;">
             <div class="field" style="position:relative;">
               <label>Vehicle Code or Name</label>
-              <input type="text" id="oilManualCode" placeholder="e.g. DF01 or Forklift 1" autocomplete="off" oninput="oilOnManualInput()">
+              <input type="text" id="oilManualCode" placeholder="Forklift 1" autocomplete="off" oninput="oilOnManualInput()">
               <div id="oilManualSuggestions" class="uv-suggestion-list hidden"></div>
             </div>
             <button class="btn btn-outline" onclick="oilSubmitManualCode()">Lookup Vehicle</button>
