@@ -182,8 +182,8 @@
   /* ---- 4-digit PIN box entry (login password) ---- */
   .pin-boxes{display:flex;gap:10px;justify-content:center;}
   .pin-box{
-    width:56px;height:60px;text-align:center;font-size:26px;font-weight:800;
-    border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--text);
+    width:52px;height:52px;text-align:center;font-size:22px;font-weight:800;
+    border:1.5px solid var(--border);border-radius:10px;background:#fafafa;color:var(--text);
     -webkit-text-security:disc;
   }
   .pin-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,108,181,.15);}
@@ -374,24 +374,20 @@
           <span>Last Consumption</span>
         </div>
         <div class="info-row">
-          <div class="label">Date &amp; Time</div>
-          <div class="value" id="vLastDateTime">No previous record</div>
-        </div>
-        <div class="info-row">
           <div class="label">Quantity</div>
           <div class="value" id="vLastQuantity">-</div>
+        </div>
+        <div class="info-row">
+          <div class="label">Time Since Last</div>
+          <div class="value" id="vTimeSince">-</div>
         </div>
         <div class="info-row">
           <div class="label">Meter Reading</div>
           <div class="value" id="vLastMeter">-</div>
         </div>
         <div class="info-row">
-          <div class="label">Consumption Rate/Day</div>
+          <div class="label">Standard Consumption</div>
           <div class="value" id="vConsumptionRate">-</div>
-        </div>
-        <div class="info-row">
-          <div class="label">Time Since Last</div>
-          <div class="value" id="vTimeSince">-</div>
         </div>
         <div class="info-row">
           <div class="label">Driver</div>
@@ -408,21 +404,21 @@
         <div id="entryError"></div>
         <div class="field">
           <label>Quantity (LTR)</label>
-          <input type="number" id="entryQuantity" placeholder="e.g. 25" inputmode="decimal" min="0">
+          <input type="number" id="entryQuantity" inputmode="decimal" min="0">
         </div>
         <div class="field">
           <label>Vehicle Meter Reading</label>
-          <input type="number" id="entryMeter" placeholder="e.g. 4580" inputmode="decimal" min="0">
+          <input type="number" id="entryMeter" inputmode="decimal" min="0">
         </div>
         <div class="field" style="position:relative;">
           <label>Driver ID / Mobile Number</label>
-          <input type="text" id="driverLookup" placeholder="e.g. DR-1025 or 017XXXXXXXX" autocomplete="off">
+          <input type="tel" id="driverLookup" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
           <div id="driverSuggestions" class="suggestion-list hidden"></div>
           <div id="driverStatus" style="font-size:12px;margin-top:6px;"></div>
         </div>
         <div class="field">
           <label>Driver Name</label>
-          <input type="text" id="driverName" placeholder="Auto-filled after a valid match" readonly style="background:#f0f0f0;color:var(--muted);">
+          <input type="text" id="driverName" readonly style="background:#f0f0f0;color:var(--muted);">
         </div>
         <button class="btn btn-primary" id="saveBtn" onclick="submitEntry()">Save Diesel Entry</button>
         <button class="btn btn-outline" onclick="cancelToScan()">Cancel / Scan Different Vehicle</button>
@@ -589,7 +585,7 @@
           <div id="oilManualEntry" class="hidden" style="margin-top:14px;">
             <div class="field" style="position:relative;">
               <label>Search by vehicle name or code</label>
-              <input type="text" id="oilManualCode" placeholder="Start typing..." autocomplete="off" oninput="oilOnSearchInput()">
+              <input type="text" id="oilManualCode" autocomplete="off" oninput="oilOnSearchInput()">
               <div id="oilSearchSuggestions" class="uv-suggestion-list hidden"></div>
             </div>
           </div>
@@ -613,13 +609,13 @@
           <div class="section-title" style="margin-top:0;">Driver</div>
           <div class="field" style="position:relative;">
             <label>Driver ID / Mobile Number</label>
-            <input type="text" id="oilDriverLookup" placeholder="e.g. DR-1025 or 017XXXXXXXX" autocomplete="off" oninput="oilSearchDriver()">
+            <input type="tel" id="oilDriverLookup" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="oilSearchDriver()">
             <div id="oilDriverSuggestions" class="suggestion-list hidden"></div>
           </div>
           <div id="oilDriverStatus" style="font-size:13px;margin-bottom:10px;"></div>
           <div class="field">
             <label>Driver Name</label>
-            <input type="text" id="oilDriverName" placeholder="Auto-filled after match" readonly style="background:var(--bg);">
+            <input type="text" id="oilDriverName" readonly style="background:var(--bg);">
           </div>
         </div>
 
@@ -645,7 +641,7 @@
         <div class="card">
           <div class="field" style="margin-bottom:0;">
             <label>Current Meter Reading</label>
-            <input type="number" id="oilMeterReading" placeholder="e.g. 4521" inputmode="decimal">
+            <input type="number" id="oilMeterReading" inputmode="decimal">
           </div>
         </div>
 
@@ -724,6 +720,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const driverInput = document.getElementById("driverLookup");
   driverInput.addEventListener("input", () => {
+    // Digits only — Driver ID / Mobile Number is now numeric-only,
+    // matching the Vehicle Meter Reading field's style.
+    const cleaned = driverInput.value.replace(/\D/g, "");
+    if (cleaned !== driverInput.value) driverInput.value = cleaned;
     clearTimeout(driverSearchTimer);
     driverSearchTimer = setTimeout(searchDriver, 400); // debounce, also renders suggestions
   });
@@ -1329,7 +1329,7 @@ function renderVehicleInfo(data) {
 function renderLastConsumption(data) {
   document.getElementById("vConsumptionRate").textContent =
     (data.consumptionRate !== null && data.consumptionRate !== undefined)
-      ? data.consumptionRate + " L/day"
+      ? data.consumptionRate + " L"
       : "-";
 
   document.getElementById("vDutyDriver").textContent = data.dutyDriver || "N/A";
@@ -1337,7 +1337,6 @@ function renderLastConsumption(data) {
 
   if (data.datetime) {
     const dt = new Date(data.datetime);
-    document.getElementById("vLastDateTime").textContent = formatDateTime(dt);
     document.getElementById("vLastQuantity").textContent = data.quantity + " LTR";
     document.getElementById("vLastMeter").textContent = data.meterReading;
 
@@ -1346,7 +1345,6 @@ function renderLastConsumption(data) {
     document.getElementById("vTimeSince").innerHTML =
       text + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span>';
   } else {
-    document.getElementById("vLastDateTime").textContent = "No previous record";
     document.getElementById("vLastQuantity").textContent = "-";
     document.getElementById("vLastMeter").textContent = "-";
     document.getElementById("vTimeSince").textContent = "-";
@@ -1363,18 +1361,24 @@ function timeSince(diffMs) {
   const days = Math.floor(totalMinutes / (60 * 24));
   const remHours = Math.floor((totalMinutes % (60 * 24)) / 60);
   const remMinutes = totalMinutes % 60;
-  const text = days + " Day" + (days !== 1 ? "s" : "") + " " +
-    remHours + " Hour" + (remHours !== 1 ? "s" : "") + " " +
-    remMinutes + " Minute" + (remMinutes !== 1 ? "s" : "");
+
+  // Drop leading zero-valued units — e.g. "1 Min" instead of
+  // "0 Day 0 Hr 1 Min", and "6 Hr 1 Min" instead of "0 Day 6 Hr 1 Min".
+  // Minutes are always shown, even if 0.
+  const parts = [];
+  if (days > 0) parts.push(days + " Day");
+  if (days > 0 || remHours > 0) parts.push(remHours + " Hr");
+  parts.push(remMinutes + " Min");
+  const text = parts.join(" ");
 
   const hours = diffMs / (1000 * 60 * 60);
   let statusClass, statusLabel;
   if (hours < 24) {
-    statusClass = "status-recent"; statusLabel = "🟢 Recent";
+    statusClass = "status-delayed"; statusLabel = "🔴";
   } else if (hours <= 48) {
-    statusClass = "status-moderate"; statusLabel = "🟡 Moderate";
+    statusClass = "status-moderate"; statusLabel = "🟡";
   } else {
-    statusClass = "status-delayed"; statusLabel = "🔴 Delayed";
+    statusClass = "status-recent"; statusLabel = "🟢";
   }
   return { text, statusClass, statusLabel };
 }
@@ -1930,7 +1934,13 @@ function oilSelectPurpose(purpose) {
 
 /* ---- Driver lookup (identical logic/table to the Diesel driver search) ---- */
 async function oilSearchDriver() {
-  const val = document.getElementById("oilDriverLookup").value.trim();
+  const inputEl = document.getElementById("oilDriverLookup");
+  // Digits only — Driver ID / Mobile Number is now numeric-only,
+  // matching the Vehicle Meter Reading field's style.
+  const cleaned = inputEl.value.replace(/\D/g, "");
+  if (cleaned !== inputEl.value) inputEl.value = cleaned;
+
+  const val = inputEl.value.trim();
   const statusEl = document.getElementById("oilDriverStatus");
   const nameField = document.getElementById("oilDriverName");
   const box = document.getElementById("oilDriverSuggestions");
