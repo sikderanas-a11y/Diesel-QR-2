@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Diesel Tracker</title>
-<!-- BUILD MARKER: oil-per-type-columns-v2 -->
-<script>window.APP_BUILD = "oil-per-type-columns-v2";</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --accent:#2D6CB5; --accent2:#9C3F92; --accent-dark:#1F4E85;
@@ -212,20 +209,14 @@
   .bottom-nav.hidden{display:none;}
   .nav-item{
     background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:2px;font-size:9.5px;font-weight:600;color:var(--muted);cursor:pointer;padding:6px 4px;border-radius:10px;
-    min-width:0;flex:1;max-width:72px;
+    gap:3px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;padding:6px 4px;border-radius:10px;
+    min-width:0;flex:1;max-width:140px;
   }
-  .nav-item .nav-icon{font-size:18px;line-height:1;}
+  .nav-item .nav-icon{font-size:21px;line-height:1;}
   .nav-item.active{color:var(--accent);}
   .nav-item.active .nav-icon{filter:drop-shadow(0 1px 1px rgba(0,145,234,.3));}
-  .nav-item-plus{
-    background:var(--brand-gradient);color:#fff;width:50px;height:50px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;
-    box-shadow:0 4px 14px rgba(0,145,234,.45);cursor:pointer;border:none;
-    margin-top:-20px;flex-shrink:0;
-  }
-  .nav-item-plus:active{background:var(--accent-dark);}
   .with-bottom-nav{padding-bottom:84px;}
+  .logo-fallback{font-size:56px;line-height:88px;}
 
   /* ---- Home stat card ---- */
   .stat-card{
@@ -252,42 +243,6 @@
   .diff-match{background:var(--green-light);color:var(--green-dark);}
   .diff-mismatch{background:#fdeceb;color:var(--red);}
 
-  /* ---- Oil page ---- */
-  .oil-row{
-    border-bottom:1px solid var(--border);padding:14px 0;
-  }
-  .oil-row:last-child{border-bottom:none;}
-  .oil-row .oil-row-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;}
-  .qty-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-  .qty-btn{
-    background:#fff;border:1.5px solid var(--border);border-radius:9px;
-    padding:9px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;min-width:48px;text-align:center;
-  }
-  .qty-btn.sel{background:var(--brand-gradient);border-color:transparent;color:#fff;}
-  .qty-other-input{
-    background:#fff;border:1.5px solid var(--border);border-radius:9px;
-    padding:9px 12px;font-size:14px;font-weight:600;color:var(--text);width:88px;
-  }
-  .qty-other-input:focus{outline:none;border-color:var(--accent);}
-  .purpose-btns{display:flex;gap:10px;}
-  .purpose-btn{
-    flex:1;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;
-    text-align:left;cursor:pointer;
-  }
-  .purpose-btn .pb-title{font-size:14px;font-weight:800;color:var(--text);}
-  .purpose-btn .pb-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
-  .purpose-btn.sel{border-color:var(--accent);background:linear-gradient(0deg,rgba(45,108,181,.06),rgba(45,108,181,.06));}
-  .purpose-btn.sel .pb-title{color:var(--accent-dark);}
-  .scan-cta{
-    text-align:center;background:var(--brand-gradient);color:#fff;border:none;border-radius:14px;
-    padding:22px 20px;width:100%;font-size:16px;font-weight:800;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;gap:8px;
-  }
-  .scan-cta .cta-icon{font-size:34px;}
-  .vehicle-confirm-badge{
-    display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);
-    font-size:12px;font-weight:800;padding:6px 12px;border-radius:20px;margin-bottom:10px;
-  }
 </style>
 </head>
 <body>
@@ -304,7 +259,7 @@
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="loginScreen">
       <div class="center-logo">
-        <div class="icon"><img src="logo.png" alt="XIC Logo"></div>
+        <div class="icon" id="loginLogo"><span class="logo-fallback">⛽</span></div>
         <h2>Operator Login</h2>
         <p>Enter your details to start recording diesel entries</p>
       </div>
@@ -354,6 +309,7 @@
           </div>
           <button class="btn btn-outline" onclick="submitManualCode()">Lookup Vehicle</button>
         </div>
+        <button class="btn btn-outline" style="background:#fff;border:1.5px solid var(--accent);color:var(--accent);" onclick="openVehicleInfo()">ℹ️ Vehicle Information</button>
       </div>
     </div>
 
@@ -422,6 +378,7 @@
         </div>
         <button class="btn btn-primary" id="saveBtn" onclick="submitEntry()">Save Diesel Entry</button>
         <button class="btn btn-outline" onclick="cancelToScan()">Cancel / Scan Different Vehicle</button>
+        <button class="btn btn-outline" style="background:#fff;border:1.5px solid var(--accent);color:var(--accent);" onclick="openVehicleInfo(currentVehicle && currentVehicle.code)">ℹ️ Vehicle Information</button>
       </div>
     </div>
 
@@ -444,7 +401,7 @@
     <!-- ================= VEHICLE INFO FULL-SCREEN PAGE ================= -->
     <div id="vehicleInfoScreen" class="hidden">
       <div class="page-header">
-        <button class="back-btn" onclick="showTab('home')">←</button>
+        <button class="back-btn" onclick="closeVehicleInfo()">←</button>
         <h2>Vehicle Information</h2>
       </div>
 
@@ -563,104 +520,6 @@
       </div>
     </div>
 
-    <!-- ================= OIL FULL-SCREEN PAGE ================= -->
-    <div id="oilScreen" class="hidden">
-      <div class="page-header">
-        <button class="back-btn" onclick="showTab('home')">←</button>
-        <h2>Oil Tracker</h2>
-      </div>
-
-      <!-- ---- Scan state ---- -->
-      <div id="oilScanBlock">
-        <div class="card">
-          <div id="oilScanCtaWrap">
-            <button class="scan-cta" onclick="oilStartScanner()">
-              <span class="cta-icon">📷</span>
-              <span>Scan Vehicle QR</span>
-            </button>
-          </div>
-          <div id="oil-qr-reader" style="margin-top:14px;"></div>
-          <div class="scan-status" id="oilScanStatus"></div>
-          <div class="manual-toggle" onclick="oilToggleManual()">Enter code manually instead</div>
-          <div id="oilManualEntry" class="hidden" style="margin-top:14px;">
-            <div class="field" style="position:relative;">
-              <label>Search by vehicle name or code</label>
-              <input type="text" id="oilManualCode" autocomplete="off" oninput="oilOnSearchInput()">
-              <div id="oilSearchSuggestions" class="uv-suggestion-list hidden"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ---- Vehicle confirmed + Oil entry form ---- -->
-      <div id="oilFormBlock" class="hidden">
-        <div class="card">
-          <div class="vehicle-confirm-badge">✓ Vehicle Scanned</div>
-          <div class="info-row"><div class="label">Vehicle Name</div><div class="value" id="oilVehicleName">-</div></div>
-          <div class="info-row"><div class="label">Vehicle Code</div><div class="value" id="oilVehicleCode">-</div></div>
-        </div>
-
-        <div class="card hidden" id="oilLatestCard">
-          <div class="section-title" style="margin-top:0;">Latest Oil Record</div>
-          <div id="oilLatestInfo"></div>
-        </div>
-
-        <div class="card">
-          <div class="section-title" style="margin-top:0;">Driver</div>
-          <div class="field" style="position:relative;">
-            <label>Driver ID / Mobile Number</label>
-            <input type="tel" id="oilDriverLookup" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="oilSearchDriver()">
-            <div id="oilDriverSuggestions" class="suggestion-list hidden"></div>
-          </div>
-          <div id="oilDriverStatus" style="font-size:13px;margin-bottom:10px;"></div>
-          <div class="field">
-            <label>Driver Name</label>
-            <input type="text" id="oilDriverName" readonly style="background:var(--bg);">
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-title" style="margin-top:0;">Oil Quantities (Litres)</div>
-          <div id="oilRowsContainer"></div>
-        </div>
-
-        <div class="card">
-          <div class="section-title" style="margin-top:0;">Purpose</div>
-          <div class="purpose-btns" id="oilPurposeBtns">
-            <button type="button" class="purpose-btn" data-purpose="Scheduled" onclick="oilSelectPurpose('Scheduled')">
-              <div class="pb-title">Scheduled</div>
-              <div class="pb-sub">Routine maintenance</div>
-            </button>
-            <button type="button" class="purpose-btn" data-purpose="Loss Oil" onclick="oilSelectPurpose('Loss Oil')">
-              <div class="pb-title">Loss Oil</div>
-              <div class="pb-sub">Leak / unplanned use</div>
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="field" style="margin-bottom:0;">
-            <label>Current Meter Reading</label>
-            <input type="number" id="oilMeterReading" inputmode="decimal">
-          </div>
-        </div>
-
-        <div id="oilEntryError"></div>
-        <button class="btn btn-primary" id="oilSaveBtn" onclick="oilSubmitEntry()">Save Oil Entry</button>
-        <button class="btn btn-outline" onclick="oilResetToScan()" style="background:#fff;border:1.5px solid var(--accent);color:var(--accent);">Scan Another Vehicle</button>
-      </div>
-
-      <!-- ---- Success state ---- -->
-      <div id="oilSuccessBlock" class="hidden">
-        <div class="card success-box">
-          <div class="icon">✓</div>
-          <h2>Oil Record Saved Successfully</h2>
-          <div class="success-summary" id="oilSuccessSummary"></div>
-          <button class="btn btn-primary" style="margin-top:20px;" onclick="oilResetToScan()">Scan Next Vehicle</button>
-        </div>
-      </div>
-    </div>
-
   </main>
 
   <div class="bottom-nav hidden" id="bottomNav">
@@ -670,35 +529,61 @@
     <button class="nav-item" id="navReading" onclick="showTab('reading')">
       <span class="nav-icon">📊</span><span>Reading</span>
     </button>
-    <button class="nav-item-plus" id="navPlus" onclick="showTab('vehicle')">+</button>
-    <button class="nav-item" id="navOil" onclick="showTab('oil')">
-      <span class="nav-icon">🛢️</span><span>Oil</span>
-    </button>
     <button class="nav-item" id="navAccount" onclick="showTab('account')">
       <span class="nav-icon">👤</span><span>Account</span>
     </button>
   </div>
 </div>
 
-<script>
-/* ============ SUPABASE CONFIGURATION ============ */
-/* Replace these two values with your own project's values.        */
-/* Dashboard -> Project Settings -> API                             */
-const SUPABASE_URL = "https://oshqaazzteqqukilghev.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zaHFhYXp6dGVxcXVraWxnaGV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzc4ODYsImV4cCI6MjEwMTMxMzg4Nn0.Rz33PdqBlq9yWqgNiz_4B_2fG6B3ztpk3dTx44He4F0";
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+/* ============ CONFIG ============ */
+// Optional: put a hosted logo URL or a data: URI here (Apps Script has no logo.png file).
+const LOGO_URL = "https://drive.google.com/file/d/1N1bTxOnaCvYf2TmuQ_qF1ggsFi_0Eijt/view?usp=sharing";
+
+/* ============ APPS SCRIPT BRIDGE ============ */
+// Wraps google.script.run in a Promise. Backend returns {success, data} or {success:false, message}.
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCOZpXmxDPfHh8hZJheGh61R-6wCfQQVMfyR8cgihTUAmFT7vEcLfLVnOtV22mL6E/exec";
+// Calls a backend function: google.script.run when served by Apps Script, otherwise POST to the hard-coded web app URL.
+function callBackend(fnName, args) {
+  return new Promise(function (resolve, reject) {
+    if (window.google && google.script && google.script.run) {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(new Error(e && e.message ? e.message : String(e))); })[fnName].apply(google.script.run, args);
+      return;
+    }
+    fetch(APPS_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn: fnName, args: args }) })
+      .then(function (r) { return r.json(); }).then(resolve)
+      .catch(function () { reject(new Error("Cannot reach the server. Check your connection.")); });
+  });
+}
+function gs(fnName) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  return callBackend(fnName, args).then(function (res) {
+    if (res && res.success) return res.data;
+    const e = new Error((res && res.message) || "Request failed");
+    e.isBusiness = true;
+    throw e;
+  });
+}
+function friendly(err, fallback) { return err && err.isBusiness ? err.message : fallback; }
+function newRequestId() {
+  return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
 
 /* ============ STATE ============ */
-let currentVehicle = null; // { code, vehicle, datetime, quantity, meterReading }
+let currentVehicle = null; // { code, vehicle, datetime(ms), nowMs, fetchedAt, quantity, meterReading, ... }
 let html5QrCode = null;
 let scanLocked = false;
-let matchedDriver = null; // { name, id_or_mobile } once a valid driver is found
+let matchedDriver = null; // { name, idOrMobile } once a valid driver is found
 let driverSearchTimer = null;
-let vehicleListCache = null; // [{code, vehicle_name}] loaded once, reused for manual-code suggestions
+let driverSearchSeq = 0;
+let vehicleListCache = null; // [{code, vehicle_name}] loaded once, reused for suggestions
+let submitting = false;
+let pendingRequestId = null;
 
 /* ============ INIT ============ */
 document.addEventListener("DOMContentLoaded", () => {
+  if (LOGO_URL) document.getElementById("loginLogo").innerHTML = '<img src="' + LOGO_URL + '" alt="Logo">';
   const op = getOperator();
   if (op) {
     showLoggedInHeader(op);
@@ -743,9 +628,12 @@ function hideSuggestions(elId) {
 /* ============ VEHICLE CODE AUTOSUGGEST (manual entry) ============ */
 async function loadVehicleListCache() {
   if (vehicleListCache) return vehicleListCache; // load once, reuse
-  const { data, error } = await sb.from("master").select("code, vehicle_name").order("code");
-  if (error) { console.error(error); return []; }
-  vehicleListCache = data || [];
+  try {
+    vehicleListCache = await gs("getVehicleList");
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
   return vehicleListCache;
 }
 
@@ -801,14 +689,12 @@ function showScreen(name) {
   document.getElementById("vehicleInfoScreen").classList.add("hidden");
   document.getElementById("accountScreen").classList.add("hidden");
   document.getElementById("readingScreen").classList.add("hidden");
-  document.getElementById("oilScreen").classList.add("hidden");
   if (name === "login") {
     document.getElementById("bottomNav").classList.add("hidden");
   } else {
     document.getElementById("bottomNav").classList.remove("hidden");
     document.getElementById("navHome").classList.add("active");
     document.getElementById("navReading").classList.remove("active");
-    document.getElementById("navOil").classList.remove("active");
     document.getElementById("navAccount").classList.remove("active");
   }
 }
@@ -817,86 +703,72 @@ function showLoggedInHeader(op) {
   document.getElementById("headerSub").textContent = "Logged in: " + op.name;
 }
 
-/* ============ TOP-LEVEL TAB ROUTER (Home / Reading / + / Oil / Account) ============ */
+/* ============ TOP-LEVEL TAB ROUTER (Home / Reading / Account) ============ */
 function showTab(tab) {
   const op = getOperator();
   if (!op) { showScreen("login"); return; }
 
-  if (tab !== "vehicle") uvStopScanner();
+  uvStopScanner();
   if (tab !== "home") stopScanner();
-  if (tab !== "oil") oilStopScanner();
 
-  // Home covers scan / loading / vehicle(entry) / success sub-screens,
-  // so let showScreen handle which of those is currently active; default
-  // to the scan screen when freshly switching into Home.
   const homeScreens = ["scan", "loading", "vehicle", "success"];
   const vehicleInfoEl = document.getElementById("vehicleInfoScreen");
   const accountEl = document.getElementById("accountScreen");
   const readingEl = document.getElementById("readingScreen");
-  const oilEl = document.getElementById("oilScreen");
+
+  vehicleInfoEl.classList.add("hidden");
+  accountEl.classList.add("hidden");
+  readingEl.classList.add("hidden");
 
   if (tab === "home") {
-    vehicleInfoEl.classList.add("hidden");
-    accountEl.classList.add("hidden");
-    readingEl.classList.add("hidden");
-    oilEl.classList.add("hidden");
     const anyHomeVisible = homeScreens.some(s => !document.getElementById(s + "Screen").classList.contains("hidden"));
     if (!anyHomeVisible) {
       showScreenKeepingChrome("scan");
-      // Auto-open the QR scanner the moment Home becomes the active
-      // screen, so the operator doesn't have to tap "Start Camera"
-      // themselves. startScanner() already falls back to showing the
-      // manual "Start Camera" button if the browser blocks/denies it.
+      // Auto-open the QR scanner; startScanner() falls back to the manual
+      // "Start Camera" button if the browser blocks/denies it.
       startScanner();
     }
     refreshDieselReceivedCount();
-  } else if (tab === "vehicle") {
-    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
-    document.getElementById("loginScreen").classList.add("hidden");
-    accountEl.classList.add("hidden");
-    readingEl.classList.add("hidden");
-    oilEl.classList.add("hidden");
-    vehicleInfoEl.classList.remove("hidden");
-    uvBackToScan();
+    loadVehicleListCache();
   } else if (tab === "account") {
     homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
     document.getElementById("loginScreen").classList.add("hidden");
-    vehicleInfoEl.classList.add("hidden");
-    readingEl.classList.add("hidden");
-    oilEl.classList.add("hidden");
     accountEl.classList.remove("hidden");
     populateAccountScreen(op);
-    stopScanner();
-    uvStopScanner();
   } else if (tab === "reading") {
     homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
     document.getElementById("loginScreen").classList.add("hidden");
-    vehicleInfoEl.classList.add("hidden");
-    accountEl.classList.add("hidden");
-    oilEl.classList.add("hidden");
     readingEl.classList.remove("hidden");
-    stopScanner();
-    uvStopScanner();
     loadReadingPage();
-  } else if (tab === "oil") {
-    homeScreens.forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
-    document.getElementById("loginScreen").classList.add("hidden");
-    vehicleInfoEl.classList.add("hidden");
-    accountEl.classList.add("hidden");
-    readingEl.classList.add("hidden");
-    oilEl.classList.remove("hidden");
-    stopScanner();
-    uvStopScanner();
-    oilResetToScan();
   }
 
   document.getElementById("bottomNav").classList.remove("hidden");
-  ["navHome", "navReading", "navOil", "navAccount"].forEach(id => document.getElementById(id).classList.remove("active"));
+  ["navHome", "navReading", "navAccount"].forEach(id => document.getElementById(id).classList.remove("active"));
   if (tab === "home") document.getElementById("navHome").classList.add("active");
   if (tab === "reading") document.getElementById("navReading").classList.add("active");
-  if (tab === "oil") document.getElementById("navOil").classList.add("active");
   if (tab === "account") document.getElementById("navAccount").classList.add("active");
 }
+
+/* Vehicle Information is now opened from Home (scan card or vehicle entry card). */
+function openVehicleInfo(code) {
+  stopScanner();
+  ["scan", "loading", "vehicle", "success"].forEach(s => document.getElementById(s + "Screen").classList.add("hidden"));
+  document.getElementById("vehicleInfoScreen").classList.remove("hidden");
+  uvBackToScan();
+  if (code) uvLookupVehicle(code);
+}
+
+function closeVehicleInfo() {
+  uvStopScanner();
+  document.getElementById("vehicleInfoScreen").classList.add("hidden");
+  if (currentVehicle) {
+    showScreenKeepingChrome("vehicle");
+  } else {
+    showScreenKeepingChrome("scan");
+    startScanner();
+  }
+}
+
 
 /* Like showScreen but doesn't touch the bottom nav / vehicle / account tabs */
 function showScreenKeepingChrome(name) {
@@ -1000,54 +872,19 @@ async function handleLogin() {
   btn.textContent = "Logging in...";
 
   try {
-    // XIC_ID is stored as int8 in Supabase, so match on the numeric
-    // value rather than the raw string the operator typed.
-    const idNumeric = Number(idNumber);
-    if (isNaN(idNumeric)) {
-      btn.disabled = false;
-      btn.textContent = "Login";
-      showError(errorBox, "ID Number does not match.");
-      clearLoginPin();
-      return;
-    }
-
-    const { data: existing, error: selectErr } = await sb
-      .from("operator_login")
-      .select("name, mobile, XIC_ID, pass")
-      .eq("XIC_ID", idNumeric)
-      .maybeSingle();
-
-    if (selectErr) throw selectErr;
-
-    if (!existing) {
-      btn.disabled = false;
-      btn.textContent = "Login";
-      showError(errorBox, "Operator not found.");
-      clearLoginPin();
-      return;
-    }
-
-    if (String(existing.pass) !== String(password)) {
-      btn.disabled = false;
-      btn.textContent = "Login";
-      showError(errorBox, "Incorrect password. Please try again.");
-      clearLoginPin();
-      return;
-    }
-
+    const user = await gs("loginOperator", idNumber, password);
     btn.disabled = false;
     btn.textContent = "Login";
-    setOperator(existing.name, existing.mobile, existing.XIC_ID);
-    showLoggedInHeader({ name: existing.name });
+    // Only identity is stored locally - never the password.
+    setOperator(user.name, user.mobile, user.xicId);
+    showLoggedInHeader({ name: user.name });
     document.getElementById("bottomNav").classList.remove("hidden");
     showTab("home");
-    // showTab("home") auto-starts the camera. If the browser blocks it
-    // (no permission yet, insecure context, etc.) startScanner() falls
-    // back to showing the manual "Start Camera" button.
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Login";
-    showError(errorBox, "Network error. Please try again.");
+    showError(errorBox, friendly(err, "Network error. Please try again."));
+    if (err && err.isBusiness) clearLoginPin();
     console.error(err);
   }
 }
@@ -1071,36 +908,12 @@ async function handleChangePassword() {
   if (next !== confirm) { showError(errorBox, "New passwords do not match."); return; }
 
   const btn = document.getElementById("pwChangeBtn");
+  if (btn.disabled) return;
   btn.disabled = true;
   btn.textContent = "Updating...";
 
   try {
-    const { data: row, error: selectErr } = await sb
-      .from("operator_login")
-      .select("pass")
-      .eq("mobile", op.mobile)
-      .eq("XIC_ID", op.xicId)
-      .maybeSingle();
-
-    if (selectErr) throw selectErr;
-    if (!row) { showError(errorBox, "Operator not found."); btn.disabled = false; btn.textContent = "Change Password"; return; }
-
-    if (String(row.pass) !== String(current)) {
-      showError(errorBox, "Current password is incorrect.");
-      btn.disabled = false;
-      btn.textContent = "Change Password";
-      clearPinGroup("pwCurrent", false);
-      return;
-    }
-
-    const { error: updateErr } = await sb
-      .from("operator_login")
-      .update({ pass: next })
-      .eq("mobile", op.mobile)
-      .eq("XIC_ID", op.xicId);
-
-    if (updateErr) throw updateErr;
-
+    await gs("changePassword", op.xicId, current, next);
     btn.disabled = false;
     btn.textContent = "Change Password";
     clearPinGroup("pwCurrent", false);
@@ -1110,16 +923,17 @@ async function handleChangePassword() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Change Password";
-    showError(errorBox, "Network error. Please try again.");
+    showError(errorBox, friendly(err, "Network error. Please try again."));
+    if (err && err.isBusiness) clearPinGroup("pwCurrent", false);
     console.error(err);
   }
 }
+
 
 function logout() {
   clearOperator();
   stopScanner();
   uvStopScanner();
-  oilStopScanner();
   currentVehicle = null;
   document.getElementById("loginId").value = "";
   clearLoginPin();
@@ -1245,68 +1059,25 @@ function submitManualCode() {
 /* ============ VEHICLE LOOKUP ============ */
 async function lookupVehicle(code) {
   showScreen("loading");
-  const upperCode = code.toUpperCase();
-
   try {
-    const { data: vehicle, error: vErr } = await sb
-      .from("master")
-      .select("code, vehicle_name")
-      .ilike("code", upperCode)
-      .maybeSingle();
-
-    if (vErr) throw vErr;
-    if (!vehicle) {
-      alert("Vehicle not found for code: " + code);
-      cancelToScan();
-      return;
-    }
-
-    const { data: lastEntry, error: eErr } = await sb
-      .from("latest_data")
-      .select("entry_datetime, quantity, meter_reading")
-      .eq("code", upperCode)
-      .maybeSingle();
-
-    if (eErr) throw eErr;
-
-    // Small, indexed single-row lookup — same pattern as latest_data,
-    // never touches historical diesel_data.
-    const { data: rateRow, error: rErr } = await sb
-      .from("consumption_rate")
-      .select("consumption_rate_per_day")
-      .eq("code", upperCode)
-      .maybeSingle();
-
-    if (rErr) console.error(rErr); // non-critical — don't block the lookup on this
-
-    // Latest applicable duty record for this vehicle (indexed on
-    // code + duty_start desc) — never scans all duty history.
-    const { data: dutyRow, error: dErr } = await sb
-      .from("duty_records")
-      .select("driver_name, location")
-      .eq("code", upperCode)
-      .order("duty_start", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (dErr) console.error(dErr); // non-critical — don't block the lookup on this
-
+    const d = await gs("getVehicle", code);
     currentVehicle = {
-      code: vehicle.code,
-      vehicle: vehicle.vehicle_name,
-      datetime: lastEntry ? lastEntry.entry_datetime : null,
-      quantity: lastEntry ? lastEntry.quantity : null,
-      meterReading: lastEntry ? lastEntry.meter_reading : null,
-      consumptionRate: rateRow ? rateRow.consumption_rate_per_day : null,
-      dutyDriver: dutyRow ? dutyRow.driver_name : null,
-      dutyLocation: dutyRow ? dutyRow.location : null
+      code: d.code,
+      vehicle: d.vehicle_name,
+      datetime: d.entryMs,
+      nowMs: d.nowMs,
+      fetchedAt: Date.now(),
+      quantity: d.quantity,
+      meterReading: d.meter_reading,
+      consumptionRate: d.consumption_rate,
+      dutyDriver: d.driver,
+      dutyLocation: d.location
     };
-
     renderVehicleInfo(currentVehicle);
     showScreen("vehicle");
   } catch (err) {
-    alert("Network error while looking up vehicle. Please try again.");
     console.error(err);
+    alert(err && err.isBusiness ? err.message : "Network error while looking up vehicle. Please try again.");
     cancelToScan();
   }
 }
@@ -1324,6 +1095,7 @@ function renderVehicleInfo(data) {
   document.getElementById("driverStatus").innerHTML = "";
   hideSuggestions("driverSuggestions");
   matchedDriver = null;
+  pendingRequestId = null;
 }
 
 function renderLastConsumption(data) {
@@ -1336,11 +1108,11 @@ function renderLastConsumption(data) {
   document.getElementById("vDutyLocation").textContent = data.dutyLocation || "N/A";
 
   if (data.datetime) {
-    const dt = new Date(data.datetime);
     document.getElementById("vLastQuantity").textContent = data.quantity + " LTR";
     document.getElementById("vLastMeter").textContent = data.meterReading;
 
-    const diffMs = new Date() - dt;
+    // Server clock (Asia/Dhaka-correct) at fetch time + time elapsed locally since then.
+    const diffMs = Math.max(0, (data.nowMs - data.datetime) + (Date.now() - data.fetchedAt));
     const { text, statusClass, statusLabel } = timeSince(diffMs);
     document.getElementById("vTimeSince").innerHTML =
       text + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span>';
@@ -1350,6 +1122,7 @@ function renderLastConsumption(data) {
     document.getElementById("vTimeSince").textContent = "-";
   }
 }
+
 
 function formatDateTime(dt) {
   const options = { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true };
@@ -1389,6 +1162,7 @@ async function searchDriver() {
   const statusEl = document.getElementById("driverStatus");
   const nameField = document.getElementById("driverName");
   const box = document.getElementById("driverSuggestions");
+  const seq = ++driverSearchSeq;
 
   matchedDriver = null;
   nameField.value = "";
@@ -1398,16 +1172,9 @@ async function searchDriver() {
   statusEl.innerHTML = '<span style="color:var(--muted);">Searching...</span>';
 
   try {
-    // One query serves both: exact-match autofill AND the suggestion
-    // dropdown, so typing a partial ID/mobile/name still shows options.
-    const { data, error } = await sb
-      .from("driver_information")
-      .select("name, driver_id, driver_mobile_number")
-      .or("driver_id.ilike.%" + val + "%,driver_mobile_number.ilike.%" + val + "%,name.ilike.%" + val + "%")
-      .limit(6);
-
-    if (error) throw error;
-    const results = data || [];
+    // One call serves both: exact-match autofill AND the suggestion dropdown.
+    const results = (await gs("searchDrivers", val)) || [];
+    if (seq !== driverSearchSeq) return; // a newer keystroke superseded this response
 
     const exact = results.find(d =>
       d.driver_id.toLowerCase() === val.toLowerCase() ||
@@ -1448,6 +1215,7 @@ async function searchDriver() {
       });
     });
   } catch (err) {
+    if (seq !== driverSearchSeq) return;
     console.error(err);
     statusEl.innerHTML = '<span style="color:var(--red);">Network error while searching driver.</span>';
   }
@@ -1455,6 +1223,7 @@ async function searchDriver() {
 
 /* ============ SUBMIT DIESEL ENTRY ============ */
 async function submitEntry() {
+  if (submitting) return; // guards against double-tap
   const errorBox = document.getElementById("entryError");
   errorBox.innerHTML = "";
 
@@ -1469,86 +1238,47 @@ async function submitEntry() {
   if (!matchedDriver) { showError(errorBox, "Please enter a valid Driver ID/Mobile Number that matches a known driver."); return; }
 
   const btn = document.getElementById("saveBtn");
+  submitting = true;
   btn.disabled = true;
   btn.textContent = "Saving...";
 
+  // Same request id is reused if the network drops and the operator retries,
+  // so the server can return the original result instead of saving twice.
+  if (!pendingRequestId) pendingRequestId = newRequestId();
+
   try {
-    const { data, error } = await sb
-      .from("diesel_data")
-      .insert({
-        code: currentVehicle.code,
-        vehicle_name: currentVehicle.vehicle,
-        quantity: quantity,
-        meter_reading: meterReading,
-        operator_name: op.name,
-        operator_mobile: op.mobile,
-        driver_name: matchedDriver.name,
-        driver_id_mobile: matchedDriver.idOrMobile
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    // Note: latest_data is kept in sync automatically by a database
-    // trigger on diesel_data — no extra client-side write needed here.
-
-    // Update the cumulative dispenser reading for the entry's date.
-    // This is supplementary tracking — if it fails for any reason, the
-    // diesel entry itself has already been saved successfully, so we
-    // don't want to interrupt or roll back the operator's flow.
-    try {
-      const entryDate = (data.entry_datetime || new Date().toISOString()).slice(0, 10);
-      await updateDispenserReading(entryDate, quantity);
-    } catch (readingErr) {
-      console.error("Dispenser reading update failed:", readingErr);
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Save Diesel Entry";
-    document.getElementById("sVehicle").textContent = data.vehicle_name;
-    document.getElementById("sQuantity").textContent = data.quantity + " LTR";
-    document.getElementById("sMeter").textContent = data.meter_reading;
-    document.getElementById("sOperator").textContent = data.operator_name;
+    const d = await gs("saveDieselEntry", {
+      requestId: pendingRequestId,
+      code: currentVehicle.code,
+      quantity: quantity,
+      meterReading: meterReading,
+      driverIdMobile: matchedDriver.idOrMobile,
+      xicId: op.xicId
+    });
+    pendingRequestId = null;
+    document.getElementById("sVehicle").textContent = d.vehicle_name;
+    document.getElementById("sQuantity").textContent = d.quantity + " LTR";
+    document.getElementById("sMeter").textContent = d.meter_reading;
+    document.getElementById("sOperator").textContent = d.operator_name;
     showScreen("success");
   } catch (err) {
+    if (err && err.isBusiness) pendingRequestId = null; // nothing was saved
+    showError(errorBox, friendly(err, "Network error. Please try again."));
+    console.error(err);
+  } finally {
+    submitting = false;
     btn.disabled = false;
     btn.textContent = "Save Diesel Entry";
-    showError(errorBox, "Network error. Please try again.");
-    console.error(err);
   }
 }
 
 /* ============ DIESEL RECEIVED COUNT (Home stat card) ============ */
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function todayRangeISO() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return { startISO: start.toISOString(), endISO: end.toISOString() };
-}
-
 async function refreshDieselReceivedCount() {
   const el = document.getElementById("dieselReceivedCount");
   if (!el) return;
   try {
-    const { startISO, endISO } = todayRangeISO();
-    const { data, error } = await sb
-      .from("diesel_data")
-      .select("code")
-      .gte("entry_datetime", startISO)
-      .lt("entry_datetime", endISO);
-
-    if (error) throw error;
-    const uniqueVehicles = new Set((data || []).map(r => r.code));
-    el.textContent = uniqueVehicles.size + " Vehicles";
+    const d = await gs("getTodayDieselCount"); // unique vehicles, computed server-side
+    el.textContent = d.count + " Vehicles";
   } catch (err) {
     el.textContent = "- Vehicles";
     console.error("Failed to load diesel received count:", err);
@@ -1556,54 +1286,8 @@ async function refreshDieselReceivedCount() {
 }
 
 /* ============ DISPENSER METER READING ============ */
-// Maintains exactly one row per date in dispenser_meter_reading:
-// each diesel entry adds its quantity onto that date's running total,
-// starting from the most recent prior date's total when a new date begins.
-async function updateDispenserReading(entryDate, quantity) {
-  const { data: existingRow, error: selectErr } = await sb
-    .from("dispenser_meter_reading")
-    .select("last_meter_reading")
-    .eq("date", entryDate)
-    .maybeSingle();
-
-  if (selectErr) throw selectErr;
-
-  if (existingRow) {
-    const updated = Number(existingRow.last_meter_reading) + Number(quantity);
-    const { error: updateErr } = await sb
-      .from("dispenser_meter_reading")
-      .update({ last_meter_reading: updated })
-      .eq("date", entryDate);
-    if (updateErr) throw updateErr;
-    return updated;
-  }
-
-  const { data: prevRow, error: prevErr } = await sb
-    .from("dispenser_meter_reading")
-    .select("last_meter_reading")
-    .lt("date", entryDate)
-    .order("date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (prevErr) throw prevErr;
-
-  const previousReading = prevRow ? Number(prevRow.last_meter_reading) : 0;
-  const newReading = previousReading + Number(quantity);
-
-  const { error: insertErr } = await sb
-    .from("dispenser_meter_reading")
-    .insert({ date: entryDate, last_meter_reading: newReading });
-  if (insertErr) throw insertErr;
-
-  return newReading;
-}
-
-let currentExpectedReading = null;
-
 async function loadReadingPage() {
-  const today = todayStr();
-  document.getElementById("rDate").textContent = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+  document.getElementById("rDate").textContent = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" });
   document.getElementById("rExpected").textContent = "…";
   document.getElementById("rExpected2").textContent = "…";
   document.getElementById("rStarting").textContent = "…";
@@ -1612,48 +1296,12 @@ async function loadReadingPage() {
   document.getElementById("rActualInput").value = "";
 
   try {
-    // Total dispensed today, from the source-of-truth diesel_data table.
-    const { startISO, endISO } = todayRangeISO();
-    const { data: todaysEntries, error: entriesErr } = await sb
-      .from("diesel_data")
-      .select("quantity")
-      .gte("entry_datetime", startISO)
-      .lt("entry_datetime", endISO);
-    if (entriesErr) throw entriesErr;
-    const dispensedToday = (todaysEntries || []).reduce((sum, r) => sum + Number(r.quantity || 0), 0);
-
-    // Today's cumulative row, if any diesel has been recorded today yet.
-    const { data: todayRow, error: todayErr } = await sb
-      .from("dispenser_meter_reading")
-      .select("last_meter_reading")
-      .eq("date", today)
-      .maybeSingle();
-    if (todayErr) throw todayErr;
-
-    let expected;
-    if (todayRow) {
-      expected = Number(todayRow.last_meter_reading);
-    } else {
-      // No entries yet today — expected reading is just whatever the
-      // most recent prior day ended on (starting reading = expected).
-      const { data: prevRow, error: prevErr } = await sb
-        .from("dispenser_meter_reading")
-        .select("last_meter_reading")
-        .lt("date", today)
-        .order("date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (prevErr) throw prevErr;
-      expected = prevRow ? Number(prevRow.last_meter_reading) : 0;
-    }
-
-    const startingReading = expected - dispensedToday;
-    currentExpectedReading = expected;
-
-    document.getElementById("rExpected").textContent = expected.toLocaleString();
-    document.getElementById("rExpected2").textContent = expected.toLocaleString() + " L";
-    document.getElementById("rStarting").textContent = startingReading.toLocaleString() + " L";
-    document.getElementById("rDispensed").textContent = dispensedToday.toLocaleString() + " L";
+    const d = await gs("getReadingData");
+    document.getElementById("rDate").textContent = d.dateDisplay;
+    document.getElementById("rExpected").textContent = d.expected.toLocaleString();
+    document.getElementById("rExpected2").textContent = d.expected.toLocaleString() + " L";
+    document.getElementById("rStarting").textContent = d.starting.toLocaleString() + " L";
+    document.getElementById("rDispensed").textContent = d.dispensed.toLocaleString() + " L";
   } catch (err) {
     document.getElementById("rExpected").textContent = "N/A";
     document.getElementById("rExpected2").textContent = "N/A";
@@ -1663,484 +1311,33 @@ async function loadReadingPage() {
   }
 }
 
-function checkReadingDifference() {
+async function checkReadingDifference() {
   const resultBox = document.getElementById("rDiffResult");
-  const actualVal = parseFloat(document.getElementById("rActualInput").value);
+  const raw = document.getElementById("rActualInput").value;
+  const actualVal = parseFloat(raw);
 
   if (isNaN(actualVal)) {
     resultBox.innerHTML = '<div class="error-msg">Please enter the actual dispenser reading.</div>';
     return;
   }
-  if (currentExpectedReading === null) {
-    resultBox.innerHTML = '<div class="error-msg">Expected reading isn\'t available yet. Please try again.</div>';
-    return;
-  }
-
-  const diff = actualVal - currentExpectedReading;
-  if (diff === 0) {
-    resultBox.innerHTML = '<div class="diff-badge diff-match">✅ Matches — No Difference</div>';
-  } else {
-    const sign = diff > 0 ? "+" : "";
-    resultBox.innerHTML =
-      '<div class="diff-badge diff-mismatch">⚠️ Difference: ' + sign + diff.toLocaleString() + ' L</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Actual (' + actualVal.toLocaleString() +
-      ' L) minus Expected (' + currentExpectedReading.toLocaleString() + ' L)</div>';
-  }
-}
-
-/* ============ OIL TRACKER ============ */
-const OIL_TYPES = [
-  { key: "hydraulic_oil", label: "Hydraulic Oil" },
-  { key: "engine_oil", label: "Engine Oil" },
-  { key: "gear_oil", label: "Gear Oil" },
-  { key: "transmission_oil", label: "Transmission Oil" },
-  { key: "brake_oil", label: "Brake Oil" },
-  { key: "grease", label: "Grease" }
-];
-const OIL_QTY_OPTS = [0, 6, 10];
-
-let oilHtml5Qr = null;
-let oilScanLocked = false;
-let oilCurrentVehicle = null; // { code, vehicle_name }
-let oilMatchedDriver = null;  // { name, idOrMobile }
-let oilSelectedPurpose = null;
-let oilQtyValues = {}; // { hydraulic_oil: 0, engine_oil: 6, ... }
-let oilRowsBuilt = false;
-
-/* ---- Scanner (own instance, separate from Diesel + Vehicle-Info scanners) ---- */
-async function oilStartScanner() {
-  if (oilHtml5Qr && oilHtml5Qr.getState && oilHtml5Qr.getState() === 2 /* SCANNING */) return;
-
-  const statusEl = document.getElementById("oilScanStatus");
-  const ctaWrap = document.getElementById("oilScanCtaWrap");
-  oilScanLocked = false;
-  statusEl.textContent = "Requesting camera access...";
-
-  if (!window.isSecureContext) { statusEl.textContent = "Camera blocked: open this page over HTTPS (or localhost)."; return; }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { statusEl.textContent = "Camera not supported. Use manual entry below."; return; }
-
-  ctaWrap.style.display = "none";
-  const readerEl = document.getElementById("oil-qr-reader");
-  readerEl.innerHTML = "";
-  if (!oilHtml5Qr) oilHtml5Qr = new Html5Qrcode("oil-qr-reader");
-  const config = { fps: 10, qrbox: { width: 220, height: 220 } };
-
-  const onSuccess = (decodedText) => {
-    if (oilScanLocked) return;
-    oilScanLocked = true;
-    statusEl.textContent = "Code detected: " + decodedText;
-    oilStopScanner();
-    oilLookupVehicle(decodedText.trim().toUpperCase());
-  };
-  const onFailure = () => {};
 
   try {
-    await oilHtml5Qr.start({ facingMode: "environment" }, config, onSuccess, onFailure);
-    statusEl.textContent = "Point camera at the QR code";
-    return;
-  } catch (err) { console.warn(err); }
-
-  try {
-    const cams = await Html5Qrcode.getCameras();
-    if (!cams || cams.length === 0) { statusEl.textContent = "No camera found."; ctaWrap.style.display = "block"; return; }
-    const back = cams.find(c => /back|rear|environment/i.test(c.label)) || cams[0];
-    await oilHtml5Qr.start({ deviceId: { exact: back.id } }, config, onSuccess, onFailure);
-    statusEl.textContent = "Point camera at the QR code";
+    const r = await gs("checkDispenserReading", actualVal);
+    if (r.match) {
+      resultBox.innerHTML = '<div class="diff-badge diff-match">✅ Matches — No Difference</div>';
+    } else {
+      const sign = r.difference > 0 ? "+" : "";
+      resultBox.innerHTML =
+        '<div class="diff-badge diff-mismatch">⚠️ Difference: ' + sign + r.difference.toLocaleString() + ' L</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Actual (' + r.actual.toLocaleString() +
+        ' L) minus Expected (' + r.expected.toLocaleString() + ' L)</div>';
+    }
   } catch (err) {
     console.error(err);
-    const n = err && err.name;
-    statusEl.textContent = n === "NotAllowedError" ? "Camera permission denied." :
-      n === "NotFoundError" ? "No camera found." :
-      n === "NotReadableError" ? "Camera already in use by another app." : "Camera not available.";
-    ctaWrap.style.display = "block";
+    resultBox.innerHTML = '<div class="error-msg">' + escapeHtml(friendly(err, "Network error. Please try again.")) + '</div>';
   }
 }
 
-function oilStopScanner() {
-  try {
-    if (oilHtml5Qr) {
-      Promise.resolve(oilHtml5Qr.stop())
-        .then(() => { try { oilHtml5Qr.clear(); } catch (e) {} })
-        .catch(() => {})
-        .finally(() => { oilHtml5Qr = null; });
-    }
-  } catch (e) {
-    oilHtml5Qr = null;
-  }
-}
-
-function oilToggleManual() {
-  document.getElementById("oilManualEntry").classList.toggle("hidden");
-}
-
-function oilHideSuggestions() {
-  const el = document.getElementById("oilSearchSuggestions");
-  el.classList.add("hidden");
-  el.innerHTML = "";
-}
-
-async function oilOnSearchInput() {
-  const val = document.getElementById("oilManualCode").value.trim().toLowerCase();
-  const box = document.getElementById("oilSearchSuggestions");
-  if (!val) { oilHideSuggestions(); return; }
-
-  const { data: matches } = await sb.from("master")
-    .select("code, vehicle_name")
-    .or("code.ilike.%" + val + "%,vehicle_name.ilike.%" + val + "%")
-    .limit(8);
-
-  if (!matches || matches.length === 0) { oilHideSuggestions(); return; }
-
-  box.innerHTML = matches.map(v =>
-    '<div class="sug-item" data-code="' + escapeHtml(v.code) + '"><strong>' + escapeHtml(v.vehicle_name) + '</strong> — <span class="vc-code">' + escapeHtml(v.code) + '</span></div>'
-  ).join("");
-  box.classList.remove("hidden");
-
-  box.querySelectorAll(".sug-item").forEach(item => {
-    item.addEventListener("click", () => {
-      const code = item.getAttribute("data-code");
-      oilHideSuggestions();
-      document.getElementById("oilManualCode").value = "";
-      oilStopScanner();
-      oilLookupVehicle(code);
-    });
-  });
-}
-
-/* ---- Vehicle lookup (reuses the existing "master" table — same as Diesel) ---- */
-async function oilLookupVehicle(code) {
-  const statusEl = document.getElementById("oilScanStatus");
-  statusEl.textContent = "Looking up vehicle...";
-  try {
-    const { data: vehicle, error } = await sb.from("master").select("code, vehicle_name").eq("code", code).maybeSingle();
-    if (error) throw error;
-    if (!vehicle) {
-      statusEl.textContent = "Vehicle not found for code: " + code;
-      document.getElementById("oilScanCtaWrap").style.display = "block";
-      return;
-    }
-
-    oilCurrentVehicle = { code: vehicle.code, vehicle_name: vehicle.vehicle_name };
-    document.getElementById("oilVehicleName").textContent = vehicle.vehicle_name;
-    document.getElementById("oilVehicleCode").textContent = vehicle.code;
-
-    oilBuildQtyRows();
-    oilResetForm();
-    await oilLoadLatestOil(vehicle.code);
-
-    document.getElementById("oilScanBlock").classList.add("hidden");
-    document.getElementById("oilSuccessBlock").classList.add("hidden");
-    document.getElementById("oilFormBlock").classList.remove("hidden");
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "Network error while looking up vehicle.";
-    document.getElementById("oilScanCtaWrap").style.display = "block";
-  }
-}
-
-/* ---- Human-readable elapsed time, e.g. "0 Day 2 Hr 25 Min" ---- */
-function formatElapsedSince(isoString) {
-  const then = new Date(isoString).getTime();
-  const now = Date.now();
-  let diffMs = Math.max(0, now - then);
-
-  const totalMinutes = Math.floor(diffMs / 60000);
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-
-  // Drop leading zero-valued units — e.g. "1 Min" instead of
-  // "0 Day 0 Hr 1 Min", and "6 Hr 1 Min" instead of "0 Day 6 Hr 1 Min".
-  // Minutes are always shown, even if 0.
-  const parts = [];
-  if (days > 0) parts.push(days + " Day");
-  if (days > 0 || hours > 0) parts.push(hours + " Hr");
-  parts.push(minutes + " Min");
-
-  return parts.join(" ");
-}
-
-async function oilLoadLatestOil(code) {
-  const card = document.getElementById("oilLatestCard");
-  const box = document.getElementById("oilLatestInfo");
-  try {
-    const { data, error } = await sb.from("latest_oil_data").select("*").eq("code", code).maybeSingle();
-    if (error) throw error;
-    if (!data) { card.classList.add("hidden"); box.innerHTML = ""; return; }
-
-    // Show each oil type's own last change info independently, since
-    // different oil types can have been last serviced at different
-    // times, with different purposes and meter readings.
-    const rows = OIL_TYPES
-      .filter(t => data[t.key + "_change_date"])
-      .map(t => {
-        const elapsed = formatElapsedSince(data[t.key + "_change_date"]);
-        const qty = data[t.key] != null ? data[t.key] : "-";
-        return '<div class="info-row" style="align-items:flex-start;">' +
-          '<div class="label">' + t.label + '</div>' +
-          '<div class="value" style="text-align:right;">' + elapsed + '<br>' +
-          '<span style="font-weight:600;color:var(--muted);font-size:12px;">' + qty + ' L</span></div>' +
-          '</div>';
-      })
-      .join("");
-
-    box.innerHTML = rows || '<div style="font-size:13px;color:var(--muted);">No per-oil-type history recorded yet for this vehicle.</div>';
-    card.classList.remove("hidden");
-  } catch (err) {
-    console.error("Failed to load latest oil data:", err);
-    card.classList.add("hidden");
-  }
-}
-
-/* ---- Oil quantity rows (quick-select 0 / 6 / 10 / Other) ---- */
-function oilBuildQtyRows() {
-  if (oilRowsBuilt) return;
-  const container = document.getElementById("oilRowsContainer");
-  container.innerHTML = OIL_TYPES.map(t => `
-    <div class="oil-row">
-      <div class="oil-row-label">${t.label}</div>
-      <div class="qty-btns" id="oilQtyBtns_${t.key}">
-        ${OIL_QTY_OPTS.map(n => `<button type="button" class="qty-btn${n === 0 ? " sel" : ""}" data-val="${n}" onclick="oilSelectQty('${t.key}', ${n})">${n}</button>`).join("")}
-        <input type="number" class="qty-other-input" id="oilOther_${t.key}" placeholder="Other" min="0" step="0.5" oninput="oilOtherQtyInput('${t.key}')">
-      </div>
-    </div>
-  `).join("");
-  OIL_TYPES.forEach(t => { oilQtyValues[t.key] = 0; });
-  oilRowsBuilt = true;
-}
-
-function oilSelectQty(key, val) {
-  oilQtyValues[key] = val;
-  document.getElementById("oilOther_" + key).value = "";
-  document.querySelectorAll("#oilQtyBtns_" + key + " .qty-btn").forEach(b => {
-    b.classList.toggle("sel", parseFloat(b.getAttribute("data-val")) === val);
-  });
-}
-
-function oilOtherQtyInput(key) {
-  const input = document.getElementById("oilOther_" + key);
-  const v = parseFloat(input.value);
-  oilQtyValues[key] = isNaN(v) ? 0 : v;
-  document.querySelectorAll("#oilQtyBtns_" + key + " .qty-btn").forEach(b => b.classList.remove("sel"));
-}
-
-/* ---- Purpose ---- */
-function oilSelectPurpose(purpose) {
-  oilSelectedPurpose = purpose;
-  document.querySelectorAll("#oilPurposeBtns .purpose-btn").forEach(b => {
-    b.classList.toggle("sel", b.getAttribute("data-purpose") === purpose);
-  });
-}
-
-/* ---- Driver lookup (identical logic/table to the Diesel driver search) ---- */
-async function oilSearchDriver() {
-  const inputEl = document.getElementById("oilDriverLookup");
-  // Digits only — Driver ID / Mobile Number is now numeric-only,
-  // matching the Vehicle Meter Reading field's style.
-  const cleaned = inputEl.value.replace(/\D/g, "");
-  if (cleaned !== inputEl.value) inputEl.value = cleaned;
-
-  const val = inputEl.value.trim();
-  const statusEl = document.getElementById("oilDriverStatus");
-  const nameField = document.getElementById("oilDriverName");
-  const box = document.getElementById("oilDriverSuggestions");
-
-  oilMatchedDriver = null;
-  nameField.value = "";
-
-  if (!val) { statusEl.innerHTML = ""; hideSuggestions("oilDriverSuggestions"); return; }
-
-  statusEl.innerHTML = '<span style="color:var(--muted);">Searching...</span>';
-
-  try {
-    const { data, error } = await sb
-      .from("driver_information")
-      .select("name, driver_id, driver_mobile_number")
-      .or("driver_id.ilike.%" + val + "%,driver_mobile_number.ilike.%" + val + "%,name.ilike.%" + val + "%")
-      .limit(6);
-
-    if (error) throw error;
-    const results = data || [];
-
-    const exact = results.find(d =>
-      d.driver_id.toLowerCase() === val.toLowerCase() ||
-      d.driver_mobile_number.toLowerCase() === val.toLowerCase()
-    );
-
-    if (exact) {
-      oilMatchedDriver = { name: exact.name, idOrMobile: val };
-      nameField.value = exact.name;
-      statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
-      hideSuggestions("oilDriverSuggestions");
-      return;
-    }
-
-    if (results.length === 0) {
-      statusEl.innerHTML = '<span style="color:var(--red);font-weight:600;">Driver not found. Please check Driver ID/Mobile Number.</span>';
-      hideSuggestions("oilDriverSuggestions");
-      return;
-    }
-
-    statusEl.innerHTML = '<span style="color:var(--muted);">Select a matching driver below, or keep typing.</span>';
-    box.innerHTML = results.map(d =>
-      '<div class="sug-item" data-id="' + escapeHtml(d.driver_id) + '" data-mobile="' + escapeHtml(d.driver_mobile_number) + '" data-name="' + escapeHtml(d.name) + '">' +
-      '<strong>' + escapeHtml(d.name) + '</strong>' +
-      '<span class="sug-sub">' + escapeHtml(d.driver_id) + ' · ' + escapeHtml(d.driver_mobile_number) + '</span>' +
-      '</div>'
-    ).join("");
-    box.classList.remove("hidden");
-
-    box.querySelectorAll(".sug-item").forEach(item => {
-      item.addEventListener("click", () => {
-        const idVal = item.getAttribute("data-id");
-        document.getElementById("oilDriverLookup").value = idVal;
-        oilMatchedDriver = { name: item.getAttribute("data-name"), idOrMobile: idVal };
-        nameField.value = item.getAttribute("data-name");
-        statusEl.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Driver found</span>';
-        hideSuggestions("oilDriverSuggestions");
-      });
-    });
-  } catch (err) {
-    console.error(err);
-    statusEl.innerHTML = '<span style="color:var(--red);">Network error while searching driver.</span>';
-  }
-}
-
-/* ---- Reset helpers ---- */
-function oilResetForm() {
-  oilMatchedDriver = null;
-  oilSelectedPurpose = null;
-  document.getElementById("oilDriverLookup").value = "";
-  document.getElementById("oilDriverName").value = "";
-  document.getElementById("oilDriverStatus").innerHTML = "";
-  hideSuggestions("oilDriverSuggestions");
-  document.getElementById("oilMeterReading").value = "";
-  document.getElementById("oilEntryError").innerHTML = "";
-  document.querySelectorAll("#oilPurposeBtns .purpose-btn").forEach(b => b.classList.remove("sel"));
-  OIL_TYPES.forEach(t => {
-    oilQtyValues[t.key] = 0;
-    const otherInput = document.getElementById("oilOther_" + t.key);
-    if (otherInput) otherInput.value = "";
-    document.querySelectorAll("#oilQtyBtns_" + t.key + " .qty-btn").forEach(b => {
-      b.classList.toggle("sel", parseFloat(b.getAttribute("data-val")) === 0);
-    });
-  });
-}
-
-function oilResetToScan() {
-  oilStopScanner();
-  oilCurrentVehicle = null;
-  oilResetForm();
-  document.getElementById("oilManualCode").value = "";
-  document.getElementById("oilManualEntry").classList.add("hidden");
-  oilHideSuggestions();
-  document.getElementById("oilScanStatus").textContent = "";
-  document.getElementById("oilScanCtaWrap").style.display = "block";
-  document.getElementById("oilFormBlock").classList.add("hidden");
-  document.getElementById("oilSuccessBlock").classList.add("hidden");
-  document.getElementById("oilScanBlock").classList.remove("hidden");
-}
-
-/* ---- Submit ---- */
-async function oilSubmitEntry() {
-  const errorBox = document.getElementById("oilEntryError");
-  errorBox.innerHTML = "";
-
-  const op = getOperator();
-  if (!op) { showError(errorBox, "Session expired. Please log in again."); logout(); return; }
-  if (!oilCurrentVehicle) { showError(errorBox, "Please scan a vehicle first."); return; }
-  if (!oilMatchedDriver) { showError(errorBox, "Please enter a valid Driver ID/Mobile Number that matches a known driver."); return; }
-  if (!oilSelectedPurpose) { showError(errorBox, "Please select a Purpose (Scheduled or Loss Oil)."); return; }
-
-  const meterReading = parseFloat(document.getElementById("oilMeterReading").value);
-  if (isNaN(meterReading) || meterReading < 0) { showError(errorBox, "Please enter a valid meter reading."); return; }
-
-  const hasAnyOil = OIL_TYPES.some(t => Number(oilQtyValues[t.key]) > 0);
-  if (!hasAnyOil) { showError(errorBox, "Please enter at least one oil quantity."); return; }
-
-  const btn = document.getElementById("oilSaveBtn");
-  btn.disabled = true;
-  btn.textContent = "Saving...";
-
-  try {
-    const payload = {
-      code: oilCurrentVehicle.code,
-      vehicle_name: oilCurrentVehicle.vehicle_name,
-      purpose: oilSelectedPurpose,
-      meter_reading: meterReading,
-      driver_id_mobile: oilMatchedDriver.idOrMobile,
-      driver_name: oilMatchedDriver.name
-    };
-    OIL_TYPES.forEach(t => { payload[t.key] = Number(oilQtyValues[t.key]) || 0; });
-
-    // 1. Historical record — every submission is its own permanent row.
-    const { data: inserted, error: insertErr } = await sb
-      .from("oil_data")
-      .insert(payload)
-      .select()
-      .single();
-    if (insertErr) throw insertErr;
-
-    // 2. Latest-per-vehicle lookup table — upsert keyed on code, using
-    //    this same transaction's timestamp so it always reflects the
-    //    actual most recent entry_datetime, not just insertion order.
-    // Each oil type's purpose/meter_reading/change_date is only
-    // included for the oil types actually used in THIS submission
-    // (quantity > 0). Supabase's upsert only updates columns present
-    // in the payload, so oil types not used here keep whatever they
-    // already had recorded from a previous submission instead of
-    // being wiped out.
-    // This is supplementary/derived data. The historical oil_data row
-    // above is already saved and is the source of truth, so a failure
-    // here must NOT be treated as a failed submission (that would both
-    // show a false "Network error" to the operator and risk a
-    // duplicate historical row if they retry).
-    try {
-      const latestPayload = {
-        code: payload.code,
-        vehicle_name: payload.vehicle_name,
-        driver_id_mobile: payload.driver_id_mobile,
-        driver_name: payload.driver_name,
-        entry_datetime: inserted.entry_datetime
-      };
-      OIL_TYPES.forEach(t => {
-        if (Number(payload[t.key]) > 0) {
-          latestPayload[t.key] = Number(payload[t.key]);
-          latestPayload[t.key + "_change_date"] = inserted.entry_datetime;
-        }
-      });
-      const { error: upsertErr } = await sb
-        .from("latest_oil_data")
-        .upsert(latestPayload, { onConflict: "code" });
-      if (upsertErr) throw upsertErr;
-    } catch (latestErr) {
-      console.error("latest_oil_data update failed (oil_data record was still saved):", latestErr);
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Save Oil Entry";
-
-    const summaryRows = OIL_TYPES
-      .filter(t => Number(payload[t.key]) > 0)
-      .map(t => '<div class="success-row"><div class="label">' + t.label + '</div><div class="value">' + payload[t.key] + ' L</div></div>')
-      .join("");
-    document.getElementById("oilSuccessSummary").innerHTML =
-      '<div class="success-row"><div class="label">Vehicle</div><div class="value">' + escapeHtml(oilCurrentVehicle.vehicle_name) + '</div></div>' +
-      summaryRows +
-      '<div class="success-row"><div class="label">Purpose</div><div class="value">' + escapeHtml(oilSelectedPurpose) + '</div></div>' +
-      '<div class="success-row"><div class="label">Meter Reading</div><div class="value">' + meterReading + '</div></div>' +
-      '<div class="success-row"><div class="label">Driver</div><div class="value">' + escapeHtml(oilMatchedDriver.name) + '</div></div>';
-
-    document.getElementById("oilFormBlock").classList.add("hidden");
-    document.getElementById("oilSuccessBlock").classList.remove("hidden");
-    oilCurrentVehicle = null;
-  } catch (err) {
-    btn.disabled = false;
-    btn.textContent = "Save Oil Entry";
-    showError(errorBox, "Network error. Please try again.");
-    console.error(err);
-  }
-}
 
 /* ============ NAVIGATION ============ */
 function cancelToScan() {
@@ -2178,17 +1375,16 @@ function uvHideSuggestions() {
   el.innerHTML = "";
 }
 
+
 async function uvOnSearchInput() {
   const val = document.getElementById("uvSearchInput").value.trim().toLowerCase();
   const box = document.getElementById("uvSearchSuggestions");
   if (!val) { uvHideSuggestions(); return; }
 
-  const { data: matches } = await sb.from("master")
-    .select("code, vehicle_name")
-    .or("code.ilike.%" + val + "%,vehicle_name.ilike.%" + val + "%")
-    .limit(8);
+  const list = await loadVehicleListCache();
+  const matches = list.filter(v => v.code.toLowerCase().includes(val) || v.vehicle_name.toLowerCase().includes(val)).slice(0, 8);
 
-  if (!matches || matches.length === 0) { uvHideSuggestions(); return; }
+  if (matches.length === 0) { uvHideSuggestions(); return; }
 
   box.innerHTML = matches.map(v =>
     '<div class="sug-item" data-code="' + escapeHtml(v.code) + '"><strong>' + escapeHtml(v.vehicle_name) + '</strong> — <span class="vc-code">' + escapeHtml(v.code) + '</span></div>'
@@ -2204,6 +1400,7 @@ async function uvOnSearchInput() {
     });
   });
 }
+
 
 async function uvStartScanner() {
   const statusEl = document.getElementById("uvScanStatus");
@@ -2275,67 +1472,55 @@ function uvInfoRows(pairs) {
   return pairs.map(p => '<div class="info-row"><div class="label">' + escapeHtml(p[0]) + '</div><div class="value">' + escapeHtml(p[1]) + '</div></div>').join("");
 }
 
+
 async function uvLookupVehicle(code) {
   document.getElementById("uvScanScreen").classList.add("hidden");
   document.getElementById("uvDetailScreen").classList.remove("hidden");
   document.getElementById("uvVehicleName").textContent = "Loading...";
+  document.getElementById("uvVehicleCode").textContent = "-";
+  document.getElementById("uvStatusBadge").innerHTML = "";
+  document.getElementById("uvLocation").textContent = "-";
   document.getElementById("uvCurrentDriver").innerHTML = "";
   document.getElementById("uvLastDriver").innerHTML = "";
   document.getElementById("uvMechanics").innerHTML = "";
 
+  const empty = (msg) => '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">' + msg + '</div>';
+
   try {
-    const { data: vehicle, error: mErr } = await sb.from("master").select("code, vehicle_name").eq("code", code).maybeSingle();
-    if (mErr) throw mErr;
-    if (!vehicle) {
-      document.getElementById("uvVehicleName").textContent = "Vehicle not found";
-      document.getElementById("uvVehicleCode").textContent = code;
-      return;
-    }
+    const d = await gs("getVehicleInfo", code);
 
-    const { data: latest } = await sb.from("latest_data").select("status, location").eq("code", code).maybeSingle();
+    document.getElementById("uvVehicleName").textContent = d.vehicle_name;
+    document.getElementById("uvVehicleCode").textContent = d.code;
+    document.getElementById("uvStatusBadge").innerHTML = uvStatusBadgeHtml(d.status);
+    document.getElementById("uvLocation").textContent = d.location || "N/A";
 
-    const { data: duties } = await sb.from("duty_records")
-      .select("driver_name, driver_mobile, driver_id, duty_start, duty_end")
-      .eq("code", code).order("duty_start", { ascending: false }).limit(5);
-    const currentDuty = (duties || []).find(d => !d.duty_end);
-    const lastDuty = (duties || []).find(d => d.duty_end);
+    document.getElementById("uvCurrentDriver").innerHTML = d.currentDuty
+      ? uvInfoRows([["Name", d.currentDuty.name], ["Mobile", d.currentDuty.mobile], ["Driver ID", d.currentDuty.driverId || "N/A"], ["Duty Start", d.currentDuty.start]])
+      : empty("No driver currently on duty");
 
-    const { data: activeMechs } = await sb.from("mechanic_work_history")
-      .select("mechanic_name, mechanic_mobile_number, work_start_time")
-      .eq("vehicle_code", code).is("work_end_time", null);
+    document.getElementById("uvLastDriver").innerHTML = d.lastDuty
+      ? uvInfoRows([["Name", d.lastDuty.name], ["Mobile", d.lastDuty.mobile], ["Driver ID", d.lastDuty.driverId || "N/A"], ["Duty End", d.lastDuty.end]])
+      : empty("No previous duty record");
 
-    document.getElementById("uvVehicleName").textContent = vehicle.vehicle_name;
-    document.getElementById("uvVehicleCode").textContent = vehicle.code;
-    document.getElementById("uvStatusBadge").innerHTML = uvStatusBadgeHtml(latest ? latest.status : "Running");
-    document.getElementById("uvLocation").textContent = (latest && latest.location) || "N/A";
-
-    document.getElementById("uvCurrentDriver").innerHTML = currentDuty
-      ? uvInfoRows([["Name", currentDuty.driver_name], ["Mobile", currentDuty.driver_mobile], ["Driver ID", currentDuty.driver_id || "N/A"], ["Duty Start", new Date(currentDuty.duty_start).toLocaleString()]])
-      : '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No driver currently on duty</div>';
-
-    document.getElementById("uvLastDriver").innerHTML = lastDuty
-      ? uvInfoRows([["Name", lastDuty.driver_name], ["Mobile", lastDuty.driver_mobile], ["Driver ID", lastDuty.driver_id || "N/A"], ["Duty End", new Date(lastDuty.duty_end).toLocaleString()]])
-      : '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No previous duty record</div>';
-
-    const mechCard = document.getElementById("uvMechanicCard");
-    if (activeMechs && activeMechs.length > 0) {
-      document.getElementById("uvMechanics").innerHTML = activeMechs.map((m, i) => {
-        const durationMs = new Date() - new Date(m.work_start_time);
+    if (d.mechanics && d.mechanics.length > 0) {
+      document.getElementById("uvMechanics").innerHTML = d.mechanics.map((m, i) => {
+        const durationMs = Math.max(0, d.nowMs - (m.startMs || d.nowMs));
         const h = Math.floor(durationMs / 3600000), mnt = Math.floor((durationMs % 3600000) / 60000);
         return uvInfoRows([
-          ["Mechanic " + (i + 1), m.mechanic_name],
-          ["Mobile", m.mechanic_mobile_number],
-          ["Start Time", new Date(m.work_start_time).toLocaleString()],
+          ["Mechanic " + (i + 1), m.name],
+          ["Mobile", m.mobile],
+          ["Start Time", m.startDisplay],
           ["Duration", h + "h " + mnt + "m"]
         ]);
       }).join('<div style="height:10px;"></div>');
     } else {
-      document.getElementById("uvMechanics").innerHTML = '<div class="empty-state" style="padding:8px 0;color:var(--muted);font-size:13px;">No active mechanic</div>';
+      document.getElementById("uvMechanics").innerHTML = empty("No active mechanic");
     }
-    mechCard.classList.remove("hidden");
+    document.getElementById("uvMechanicCard").classList.remove("hidden");
   } catch (err) {
     console.error(err);
-    document.getElementById("uvVehicleName").textContent = "Error loading vehicle";
+    document.getElementById("uvVehicleName").textContent = err && err.isBusiness ? "Vehicle not found" : "Error loading vehicle";
+    document.getElementById("uvVehicleCode").textContent = err && err.isBusiness ? code : "";
   }
 }
 </script>
