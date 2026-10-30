@@ -346,6 +346,14 @@
   .opm-sec.off{opacity:.45;pointer-events:none;}
   .opm-title{font-weight:800;font-size:14px;margin-bottom:8px;}
   .badge-open{color:#1b8a3d;font-weight:800;} .badge-closed{color:var(--red);font-weight:800;}
+
+  /* ---- Success popup ---- */
+  .ok-pop{position:fixed;inset:0;background:rgba(20,30,50,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;animation:okfade .15s ease;}
+  .ok-pop-box{background:#fff;border-radius:18px;padding:24px 22px 18px;max-width:320px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25);}
+  .ok-pop-check{width:56px;height:56px;border-radius:50%;background:var(--brand-gradient);color:#fff;font-size:30px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+  .ok-pop-title{font-size:17px;font-weight:800;margin-bottom:4px;}
+  .ok-pop-sub{font-size:13.5px;color:var(--muted);margin-bottom:14px;word-break:break-word;}
+  @keyframes okfade{from{opacity:0;}to{opacity:1;}}
 </style>
 </head>
 <body>
@@ -1664,6 +1672,19 @@ function opMsg(msg, kind) {
   b.textContent = msg;
   b.style.color = kind === "ok" ? "#1b8a3d" : kind === "err" ? "var(--red)" : "var(--muted)";
 }
+function showSuccessPopup(title, sub) {
+  const old = document.getElementById("okPop"); if (old) old.remove();
+  const d = document.createElement("div");
+  d.className = "ok-pop"; d.id = "okPop";
+  d.innerHTML = '<div class="ok-pop-box"><div class="ok-pop-check">✓</div><div class="ok-pop-title"></div><div class="ok-pop-sub"></div><button class="btn btn-primary" type="button">OK</button></div>';
+  d.querySelector(".ok-pop-title").textContent = title;
+  d.querySelector(".ok-pop-sub").textContent = sub;
+  const close = () => { clearTimeout(t); d.remove(); };
+  d.querySelector("button").onclick = close;
+  d.onclick = e => { if (e.target === d) close(); };
+  document.body.appendChild(d);
+  const t = setTimeout(close, 4000);
+}
 function opSet(id, prop, val) { const e = document.getElementById(id); if (e) e[prop] = val; }
 function opTick() {
   const el = document.getElementById("opNow");
@@ -1738,10 +1759,6 @@ async function saveOperatorReading(type) {
   if (inp.value.trim() === "" || isNaN(val) || val < 0) { opMsg("Please enter a valid (non-negative) meter reading.", "err"); return; }
   if (type === "opening" && opDutyOpen) { opMsg("Your duty is already open. Save the closing reading first.", "err"); return; }
   if (type === "closing" && !opDutyOpen) { opMsg("No open duty to close. Save an opening reading first.", "err"); return; }
-  let note = "";
-  if (opLatest && Number(opLatest.meter_reading) !== val) note = "\n\nNote: it differs from the last recorded operator reading (" + Number(opLatest.meter_reading).toLocaleString() + " L).";
-  const label = type === "opening" ? "Opening (start duty)" : "Closing (end duty)";
-  if (!confirm("Save " + label + " meter reading of " + val.toLocaleString() + " L for " + op.name + "?" + note)) return;
   opSaving = true;
   const btn = document.getElementById(type === "opening" ? "opOpenBtn" : "opCloseBtn");
   const old = btn.textContent; btn.disabled = true; btn.textContent = "Saving...";
@@ -1750,7 +1767,9 @@ async function saveOperatorReading(type) {
     if (error) throw error;
     inp.value = "";
     await loadOperatorReading();
-    opMsg(type === "opening" ? "Opening reading saved. You can now dispense diesel." : "Closing reading saved. Duty closed.", "ok");
+    const okText = type === "opening" ? "Opening reading saved. You can now dispense diesel." : "Closing reading saved. Duty closed.";
+    opMsg(okText, "ok");
+    showSuccessPopup("Saved Successfully", (type === "opening" ? "Opening" : "Closing") + " meter reading " + val.toLocaleString() + " L. " + (type === "opening" ? "You can now dispense diesel." : "Duty closed."));
   } catch (err) {
     const m = String((err && err.message) || "");
     const known = m.match(/(NO_OPEN_DUTY|DUTY_ALREADY_OPEN|INVALID):\s*(.*)/);
