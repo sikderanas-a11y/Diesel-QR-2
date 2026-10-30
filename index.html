@@ -288,6 +288,64 @@
     display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);
     font-size:12px;font-weight:800;padding:6px 12px;border-radius:20px;margin-bottom:10px;
   }
+
+  /* ---- Home stat grid (two compact cards) ---- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .stat-grid .stat-card{margin-bottom:0;padding:13px 12px;gap:10px;min-width:0;}
+  .stat-grid .stat-card .stat-icon{width:36px;height:36px;font-size:18px;}
+  .stat-grid .stat-label{line-height:1.25;word-break:break-word;}
+  .stat-grid .stat-value{font-size:17px;}
+  .stat-grid .stat-card>div:last-child{min-width:0;}
+  .stat-card.alt{background:linear-gradient(135deg,#9C3F92 0%,#7A4FA0 45%,#2D6CB5 100%);}
+
+  /* ---- Reading: Diesel Dispensing Records ---- */
+  .rec-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .rec-date{border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;font-size:14px;font-weight:600;background:#fff;color:var(--text);font-family:inherit;}
+  .rec-date:focus{outline:none;border-color:var(--accent);}
+  .rec-sum{display:flex;gap:8px;margin:12px 0;}
+  .rec-sum div{flex:1;background:#fff;border:1px solid var(--border);border-radius:11px;padding:9px 10px;text-align:center;}
+  .rec-sum b{display:block;font-size:18px;font-weight:800;color:var(--accent-dark);}
+  .rec-sum span{font-size:11.5px;color:var(--muted);font-weight:600;}
+  .rec-slider-wrap{position:relative;}
+  .rec-slider{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 6px;}
+  .rec-slider::-webkit-scrollbar{display:none;}
+  .rec-card{flex:0 0 86%;scroll-snap-align:center;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;min-width:0;}
+  .rec-card .rc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .rec-card .rc-veh{font-size:15px;font-weight:800;word-break:break-word;}
+  .rec-card .rc-qty{background:var(--brand-gradient);color:#fff;border-radius:10px;padding:5px 10px;font-weight:800;font-size:14px;white-space:nowrap;}
+  .rec-card .rc-row{font-size:12.5px;color:var(--muted);margin-top:8px;word-break:break-word;}
+  .rec-card .rc-row b{color:var(--text);font-weight:700;}
+  .rec-card.more{display:flex;align-items:center;justify-content:center;background:transparent;border:1.5px dashed var(--border);}
+  .rec-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:6px;}
+  .rec-arrow{width:34px;height:34px;border-radius:50%;border:none;background:var(--brand-gradient);color:#fff;font-size:16px;font-weight:800;cursor:pointer;}
+  .rec-arrow:disabled{opacity:.35;}
+  .rec-pos{font-size:12.5px;font-weight:700;color:var(--muted);min-width:70px;text-align:center;}
+  .rec-table-wrap{display:none;overflow-x:auto;}
+  .rec-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .rec-table th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);}
+  .rec-table td{padding:10px;border-bottom:1px solid var(--border);word-break:break-word;}
+  .rec-table td.q{font-weight:800;color:var(--accent-dark);white-space:nowrap;}
+  .rec-state{text-align:center;color:var(--muted);font-size:13.5px;padding:18px 8px;}
+  .rec-more-btn{background:#fff;border:1.5px solid var(--accent);color:var(--accent-dark);border-radius:10px;padding:10px 16px;font-weight:800;font-size:14px;cursor:pointer;}
+  .rec-more-btn:disabled{opacity:.5;}
+  .rec-spin{display:inline-block;width:18px;height:18px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:recspin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes recspin{to{transform:rotate(360deg);}}
+  @media(min-width:768px){
+    .app:has(#readingScreen:not(.hidden)){max-width:860px;}
+    .rec-slider-wrap,.rec-nav{display:none;}
+    .rec-table-wrap{display:block;}
+  }
+
+  /* ---- Operator meter reading ---- */
+  .opm-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px;}
+  .opm-box{border-radius:12px;padding:10px;text-align:center;border:1.5px solid var(--border);background:#fff;}
+  .opm-box span{display:block;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+  .opm-box b{font-size:20px;font-weight:800;}
+  .opm-box.admin b{color:#2D6CB5;} .opm-box.oper{border-color:var(--accent);} .opm-box.oper b{color:var(--accent-dark);}
+  .opm-sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+  .opm-sec.off{opacity:.45;pointer-events:none;}
+  .opm-title{font-weight:800;font-size:14px;margin-bottom:8px;}
+  .badge-open{color:#1b8a3d;font-weight:800;} .badge-closed{color:var(--red);font-weight:800;}
 </style>
 </head>
 <body>
@@ -329,11 +387,18 @@
 
     <!-- ================= SCAN SCREEN ================= -->
     <div id="scanScreen" class="hidden">
-      <div class="stat-card">
-        <div class="stat-icon">🚚</div>
-        <div>
-          <div class="stat-label">Diesel Received Today</div>
-          <div class="stat-value" id="dieselReceivedCount">- Vehicles</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Received Today</div>
+            <div class="stat-value" id="dieselReceivedCount">- Vehicles</div>
+          </div>
+        </div>
+        <div class="stat-card alt">
+          <div>
+            <div class="stat-label"><span id="operatorServedName">Operator</span> – Served Today</div>
+            <div class="stat-value" id="operatorServedCount">- Vehicles</div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -541,7 +606,7 @@
       </div>
 
       <div class="reading-hero">
-        <div class="rh-label">Expected Dispenser Reading</div>
+        <div class="rh-label">Operator Meter Reading</div>
         <div class="rh-value"><span id="rExpected">-</span> <span class="rh-unit">L</span></div>
       </div>
 
@@ -549,17 +614,50 @@
         <div class="info-row"><div class="label">Date</div><div class="value" id="rDate">-</div></div>
         <div class="info-row"><div class="label">Starting Reading</div><div class="value" id="rStarting">-</div></div>
         <div class="info-row"><div class="label">Diesel Dispensed Today</div><div class="value" id="rDispensed">-</div></div>
-        <div class="info-row"><div class="label">Expected Reading</div><div class="value" id="rExpected2">-</div></div>
       </div>
 
-      <div class="card">
-        <div class="section-title" style="margin-top:0;">Verify Against Physical Dispenser</div>
-        <div class="field">
-          <label>Actual Dispenser Reading (L)</label>
-          <input type="number" id="rActualInput" placeholder="Enter the number shown on the machine" inputmode="decimal">
+      <!-- Operator Meter Reading (opening / closing duty) -->
+      <div class="card" id="opCard">
+        <div class="section-title" style="margin-top:0;">Operator Meter Reading</div>
+        <div class="opm-sec" id="opOpenSec">
+          <div class="opm-title">Operator Opening Meter Reading</div>
+          <div class="field"><label>Opening Meter Reading (L)</label>
+            <input type="number" id="opOpenInput" inputmode="decimal" min="0" step="any" placeholder="Physical dispenser meter reading"></div>
+          <button class="btn btn-primary" id="opOpenBtn" onclick="saveOperatorReading('opening')">Save Opening Reading</button>
         </div>
-        <button class="btn btn-primary" onclick="checkReadingDifference()">Check Difference</button>
-        <div id="rDiffResult" style="margin-top:14px;"></div>
+        <div class="opm-sec" id="opCloseSec">
+          <div class="opm-title">Closing Meter Reading (End of Duty)</div>
+          <div class="field"><label>Closing Meter Reading (L)</label>
+            <input type="number" id="opCloseInput" inputmode="decimal" min="0" step="any" placeholder="Physical dispenser meter reading"></div>
+          <button class="btn btn-primary" id="opCloseBtn" onclick="saveOperatorReading('closing')">Save Closing Reading</button>
+        </div>
+        <div id="opMsg" class="rec-state hidden"></div>
+      </div>
+
+      <!-- Diesel Dispensing Records -->
+      <div class="card">
+        <div class="rec-head">
+          <div class="section-title" style="margin:0;">Diesel Dispensing Records</div>
+          <input type="date" id="recDate" class="rec-date" onchange="recDateChanged()">
+        </div>
+        <div class="rec-sum">
+          <div><b id="recCount">-</b><span>Transactions</span></div>
+          <div><b id="recTotal">-</b><span>Total Diesel (L)</span></div>
+        </div>
+        <div id="recState" class="rec-state hidden"></div>
+        <div class="rec-slider-wrap"><div class="rec-slider" id="recSlider" onscroll="recUpdatePos()"></div></div>
+        <div class="rec-nav" id="recNav">
+          <button class="rec-arrow" id="recPrev" onclick="recSlide(-1)">‹</button>
+          <div class="rec-pos" id="recPos">-</div>
+          <button class="rec-arrow" id="recNext" onclick="recSlide(1)">›</button>
+        </div>
+        <div class="rec-table-wrap">
+          <table class="rec-table">
+            <thead><tr><th>Operator</th><th>Vehicle</th><th>Qty (L)</th><th>Operator Reading</th><th>Date &amp; Time</th></tr></thead>
+            <tbody id="recBody"></tbody>
+          </table>
+        </div>
+        <div style="text-align:center;margin-top:10px;"><button class="rec-more-btn hidden" id="recMoreBtn" onclick="recLoadMore()">Load More</button></div>
       </div>
     </div>
 
@@ -1473,35 +1571,19 @@ async function submitEntry() {
   btn.textContent = "Saving...";
 
   try {
-    const { data, error } = await sb
-      .from("diesel_data")
-      .insert({
-        code: currentVehicle.code,
-        vehicle_name: currentVehicle.vehicle,
-        quantity: quantity,
-        meter_reading: meterReading,
-        operator_name: op.name,
-        operator_mobile: op.mobile,
-        driver_name: matchedDriver.name,
-        driver_id_mobile: matchedDriver.idOrMobile
-      })
-      .select()
-      .single();
-
+    // One atomic database call: updates admin reading, operator reading and
+    // inserts the diesel_data row (with both readings) in a single transaction.
+    const { data, error } = await sb.rpc("dispense_diesel", {
+      p_code: currentVehicle.code,
+      p_vehicle_name: currentVehicle.vehicle,
+      p_quantity: quantity,
+      p_meter_reading: meterReading,
+      p_operator_name: op.name,
+      p_operator_mobile: op.mobile,
+      p_driver_name: matchedDriver.name,
+      p_driver_id_mobile: matchedDriver.idOrMobile
+    });
     if (error) throw error;
-    // Note: latest_data is kept in sync automatically by a database
-    // trigger on diesel_data — no extra client-side write needed here.
-
-    // Update the cumulative dispenser reading for the entry's date.
-    // This is supplementary tracking — if it fails for any reason, the
-    // diesel entry itself has already been saved successfully, so we
-    // don't want to interrupt or roll back the operator's flow.
-    try {
-      const entryDate = (data.entry_datetime || new Date().toISOString()).slice(0, 10);
-      await updateDispenserReading(entryDate, quantity);
-    } catch (readingErr) {
-      console.error("Dispenser reading update failed:", readingErr);
-    }
 
     btn.disabled = false;
     btn.textContent = "Save Diesel Entry";
@@ -1513,179 +1595,293 @@ async function submitEntry() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Save Diesel Entry";
-    showError(errorBox, "Network error. Please try again.");
+    const m = String((err && err.message) || "");
+    const known = m.match(/(NO_OPEN_DUTY|DUTY_ALREADY_OPEN|INVALID):\s*(.*)/);
+    showError(errorBox, known ? known[2] : "Network error. Please try again.");
     console.error(err);
   }
 }
 
 /* ============ DIESEL RECEIVED COUNT (Home stat card) ============ */
+/* Bangladesh time (UTC+6) helpers — shared by Home stats and Reading records */
+const BD_OFFSET_MS = 6 * 60 * 60 * 1000;
 function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return new Date(Date.now() + BD_OFFSET_MS).toISOString().slice(0, 10);
 }
-
-function todayRangeISO() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return { startISO: start.toISOString(), endISO: end.toISOString() };
+function dayRangeISO(dateStr) {
+  const startMs = Date.parse(dateStr + "T00:00:00Z") - BD_OFFSET_MS;
+  return { startISO: new Date(startMs).toISOString(), endISO: new Date(startMs + 86400000).toISOString() };
 }
+function todayRangeISO() { return dayRangeISO(todayStr()); }
 
 async function refreshDieselReceivedCount() {
   const el = document.getElementById("dieselReceivedCount");
   if (!el) return;
+  const opEl = document.getElementById("operatorServedCount");
+  const nameEl = document.getElementById("operatorServedName");
+  const op = getOperator();
+  const opName = op && op.name ? String(op.name).trim() : "";
+  if (nameEl) nameEl.textContent = opName || "Operator";
   try {
     const { startISO, endISO } = todayRangeISO();
+    // Single query feeds both statistics (only 2 light columns).
     const { data, error } = await sb
       .from("diesel_data")
-      .select("code")
+      .select("code, operator_name")
       .gte("entry_datetime", startISO)
       .lt("entry_datetime", endISO);
 
     if (error) throw error;
-    const uniqueVehicles = new Set((data || []).map(r => r.code));
-    el.textContent = uniqueVehicles.size + " Vehicles";
+    const rows = data || [];
+    el.textContent = new Set(rows.map(r => r.code)).size + " Vehicles";
+    if (opEl) {
+      const key = opName.toLowerCase();
+      const mine = rows.filter(r => String(r.operator_name || "").trim().toLowerCase() === key);
+      opEl.textContent = new Set(mine.map(r => r.code)).size + " Vehicles";
+    }
   } catch (err) {
     el.textContent = "- Vehicles";
+    if (opEl) opEl.textContent = "- Vehicles";
     console.error("Failed to load diesel received count:", err);
   }
 }
 
-/* ============ DISPENSER METER READING ============ */
-// Maintains exactly one row per date in dispenser_meter_reading:
-// each diesel entry adds its quantity onto that date's running total,
-// starting from the most recent prior date's total when a new date begins.
-async function updateDispenserReading(entryDate, quantity) {
-  const { data: existingRow, error: selectErr } = await sb
-    .from("dispenser_meter_reading")
-    .select("last_meter_reading")
-    .eq("date", entryDate)
-    .maybeSingle();
-
-  if (selectErr) throw selectErr;
-
-  if (existingRow) {
-    const updated = Number(existingRow.last_meter_reading) + Number(quantity);
-    const { error: updateErr } = await sb
-      .from("dispenser_meter_reading")
-      .update({ last_meter_reading: updated })
-      .eq("date", entryDate);
-    if (updateErr) throw updateErr;
-    return updated;
-  }
-
-  const { data: prevRow, error: prevErr } = await sb
-    .from("dispenser_meter_reading")
-    .select("last_meter_reading")
-    .lt("date", entryDate)
-    .order("date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (prevErr) throw prevErr;
-
-  const previousReading = prevRow ? Number(prevRow.last_meter_reading) : 0;
-  const newReading = previousReading + Number(quantity);
-
-  const { error: insertErr } = await sb
-    .from("dispenser_meter_reading")
-    .insert({ date: entryDate, last_meter_reading: newReading });
-  if (insertErr) throw insertErr;
-
-  return newReading;
-}
-
-let currentExpectedReading = null;
-
+/* Reading page: every figure comes from operator_dispenser_meter_reading only. */
 async function loadReadingPage() {
-  const today = todayStr();
-  document.getElementById("rDate").textContent = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
-  document.getElementById("rExpected").textContent = "…";
-  document.getElementById("rExpected2").textContent = "…";
-  document.getElementById("rStarting").textContent = "…";
-  document.getElementById("rDispensed").textContent = "…";
-  document.getElementById("rDiffResult").innerHTML = "";
-  document.getElementById("rActualInput").value = "";
-
-  try {
-    // Total dispensed today, from the source-of-truth diesel_data table.
-    const { startISO, endISO } = todayRangeISO();
-    const { data: todaysEntries, error: entriesErr } = await sb
-      .from("diesel_data")
-      .select("quantity")
-      .gte("entry_datetime", startISO)
-      .lt("entry_datetime", endISO);
-    if (entriesErr) throw entriesErr;
-    const dispensedToday = (todaysEntries || []).reduce((sum, r) => sum + Number(r.quantity || 0), 0);
-
-    // Today's cumulative row, if any diesel has been recorded today yet.
-    const { data: todayRow, error: todayErr } = await sb
-      .from("dispenser_meter_reading")
-      .select("last_meter_reading")
-      .eq("date", today)
-      .maybeSingle();
-    if (todayErr) throw todayErr;
-
-    let expected;
-    if (todayRow) {
-      expected = Number(todayRow.last_meter_reading);
-    } else {
-      // No entries yet today — expected reading is just whatever the
-      // most recent prior day ended on (starting reading = expected).
-      const { data: prevRow, error: prevErr } = await sb
-        .from("dispenser_meter_reading")
-        .select("last_meter_reading")
-        .lt("date", today)
-        .order("date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (prevErr) throw prevErr;
-      expected = prevRow ? Number(prevRow.last_meter_reading) : 0;
-    }
-
-    const startingReading = expected - dispensedToday;
-    currentExpectedReading = expected;
-
-    document.getElementById("rExpected").textContent = expected.toLocaleString();
-    document.getElementById("rExpected2").textContent = expected.toLocaleString() + " L";
-    document.getElementById("rStarting").textContent = startingReading.toLocaleString() + " L";
-    document.getElementById("rDispensed").textContent = dispensedToday.toLocaleString() + " L";
-  } catch (err) {
-    document.getElementById("rExpected").textContent = "N/A";
-    document.getElementById("rExpected2").textContent = "N/A";
-    document.getElementById("rStarting").textContent = "N/A";
-    document.getElementById("rDispensed").textContent = "N/A";
-    console.error("Failed to load reading page:", err);
-  }
+  recInit();
+  document.getElementById("rDate").textContent = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" });
+  ["rExpected", "rStarting", "rDispensed"].forEach(id => document.getElementById(id).textContent = "…");
+  await loadOperatorReading();
 }
 
-function checkReadingDifference() {
-  const resultBox = document.getElementById("rDiffResult");
-  const actualVal = parseFloat(document.getElementById("rActualInput").value);
+/* ============ OPERATOR OPENING / CLOSING METER READING ============ */
+let opDutyOpen = false, opLatest = null, opClock = null, opSaving = false;
 
-  if (isNaN(actualVal)) {
-    resultBox.innerHTML = '<div class="error-msg">Please enter the actual dispenser reading.</div>';
-    return;
-  }
-  if (currentExpectedReading === null) {
-    resultBox.innerHTML = '<div class="error-msg">Expected reading isn\'t available yet. Please try again.</div>';
-    return;
-  }
+function opMsg(msg, kind) {
+  const b = document.getElementById("opMsg");
+  if (!msg) { b.classList.add("hidden"); b.innerHTML = ""; return; }
+  b.classList.remove("hidden");
+  b.textContent = msg;
+  b.style.color = kind === "ok" ? "#1b8a3d" : kind === "err" ? "var(--red)" : "var(--muted)";
+}
+function opSet(id, prop, val) { const e = document.getElementById(id); if (e) e[prop] = val; }
+function opTick() {
+  const el = document.getElementById("opNow");
+  if (!el || document.getElementById("readingScreen").classList.contains("hidden")) { clearInterval(opClock); opClock = null; return; }
+  el.textContent = new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+}
+async function loadOperatorReading() {
+  const op = getOperator();
+  opSet("opName", "textContent", op ? op.name : "-");
+  opTick();
+  if (!opClock) opClock = setInterval(opTick, 1000);
+  opMsg('Loading…');
+  try {
+    // Latest operator-table record overall (shared physical dispenser) + this operator's latest record.
+    const [allQ, mineQ] = await Promise.all([
+      sb.from("operator_dispenser_meter_reading").select("meter_reading, entry_datetime, reading_type, operator_name")
+        .order("entry_datetime", { ascending: false }).order("id", { ascending: false }).limit(1),
+      sb.from("operator_dispenser_meter_reading").select("reading_type, entry_datetime, meter_reading")
+        .ilike("operator_name", (op ? op.name : "").trim())
+        .order("entry_datetime", { ascending: false }).order("id", { ascending: false }).limit(1)
+    ]);
+    if (allQ.error) throw allQ.error;
+    if (mineQ.error) throw mineQ.error;
+    opLatest = (allQ.data || [])[0] || null;
+    const mine = (mineQ.data || [])[0] || null;
+    opDutyOpen = !!mine && mine.reading_type !== "closing";
+    opSet("opLatestVal", "textContent", opLatest ? Number(opLatest.meter_reading).toLocaleString() : "-");
 
-  const diff = actualVal - currentExpectedReading;
-  if (diff === 0) {
-    resultBox.innerHTML = '<div class="diff-badge diff-match">✅ Matches — No Difference</div>';
-  } else {
-    const sign = diff > 0 ? "+" : "";
-    resultBox.innerHTML =
-      '<div class="diff-badge diff-mismatch">⚠️ Difference: ' + sign + diff.toLocaleString() + ' L</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Actual (' + actualVal.toLocaleString() +
-      ' L) minus Expected (' + currentExpectedReading.toLocaleString() + ' L)</div>';
+    // Page figures (operator readings only): opening reading of this operator's latest duty,
+    // and the newest operator record since that opening.
+    const fmt = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const { data: openRows, error: openErr } = await sb.from("operator_dispenser_meter_reading")
+      .select("meter_reading, entry_datetime").eq("reading_type", "opening")
+      .ilike("operator_name", (op ? op.name : "").trim())
+      .order("entry_datetime", { ascending: false }).order("id", { ascending: false }).limit(1);
+    if (openErr) throw openErr;
+    const opening = (openRows || [])[0] || null;
+    if (opening) {
+      const { data: sinceRows, error: sinceErr } = await sb.from("operator_dispenser_meter_reading")
+        .select("meter_reading").ilike("operator_name", (op ? op.name : "").trim())
+        .gte("entry_datetime", opening.entry_datetime)
+        .order("entry_datetime", { ascending: false }).order("id", { ascending: false }).limit(1);
+      if (sinceErr) throw sinceErr;
+      const latestNow = Number(((sinceRows || [])[0] || opening).meter_reading);
+      const start = Number(opening.meter_reading);
+      document.getElementById("rStarting").textContent = fmt(start) + " L";
+      document.getElementById("rDispensed").textContent = fmt(latestNow - start) + " L";
+      document.getElementById("rExpected").textContent = fmt(latestNow);
+    } else {
+      document.getElementById("rStarting").textContent = "Not entered";
+      document.getElementById("rDispensed").textContent = "0 L";
+      const l = opLatest ? fmt(opLatest.meter_reading) : "-";
+      document.getElementById("rExpected").textContent = l;
+    }
+    opSet("opStatus", "innerHTML", opDutyOpen ? '<span class="badge-open">Duty Open</span>' : '<span class="badge-closed">No Open Duty</span>');
+    opSet("opLastSaved", "textContent", mine ? mine.reading_type + " · " + Number(mine.meter_reading).toLocaleString() + " L · " + recFmt(mine.entry_datetime) : "No reading saved yet");
+    document.getElementById("opOpenSec").classList.toggle("off", opDutyOpen);
+    document.getElementById("opCloseSec").classList.toggle("off", !opDutyOpen);
+    opMsg("");
+  } catch (err) {
+    ["rExpected", "rStarting", "rDispensed"].forEach(id => document.getElementById(id).textContent = "N/A");
+    opMsg("Couldn't load operator reading. Make sure the SQL script has been run in Supabase.", "err");
+    console.error(err);
   }
+}
+async function saveOperatorReading(type) {
+  if (opSaving) return;
+  const op = getOperator();
+  if (!op) { logout(); return; }
+  const inp = document.getElementById(type === "opening" ? "opOpenInput" : "opCloseInput");
+  const val = parseFloat(inp.value);
+  if (inp.value.trim() === "" || isNaN(val) || val < 0) { opMsg("Please enter a valid (non-negative) meter reading.", "err"); return; }
+  if (type === "opening" && opDutyOpen) { opMsg("Your duty is already open. Save the closing reading first.", "err"); return; }
+  if (type === "closing" && !opDutyOpen) { opMsg("No open duty to close. Save an opening reading first.", "err"); return; }
+  let note = "";
+  if (opLatest && Number(opLatest.meter_reading) !== val) note = "\n\nNote: it differs from the last recorded operator reading (" + Number(opLatest.meter_reading).toLocaleString() + " L).";
+  const label = type === "opening" ? "Opening (start duty)" : "Closing (end duty)";
+  if (!confirm("Save " + label + " meter reading of " + val.toLocaleString() + " L for " + op.name + "?" + note)) return;
+  opSaving = true;
+  const btn = document.getElementById(type === "opening" ? "opOpenBtn" : "opCloseBtn");
+  const old = btn.textContent; btn.disabled = true; btn.textContent = "Saving...";
+  try {
+    const { error } = await sb.rpc("save_operator_reading", { p_operator_name: op.name, p_type: type, p_reading: val });
+    if (error) throw error;
+    inp.value = "";
+    await loadOperatorReading();
+    opMsg(type === "opening" ? "Opening reading saved. You can now dispense diesel." : "Closing reading saved. Duty closed.", "ok");
+  } catch (err) {
+    const m = String((err && err.message) || "");
+    const known = m.match(/(NO_OPEN_DUTY|DUTY_ALREADY_OPEN|INVALID):\s*(.*)/);
+    opMsg(known ? known[2] : "Couldn't save reading. Please try again.", "err");
+    console.error(err);
+  }
+  btn.disabled = false; btn.textContent = old; opSaving = false;
+}
+
+/* ============ DIESEL DISPENSING RECORDS (Reading page) ============ */
+const REC_PAGE = 20;
+let recLoaded = 0, recTotalCount = 0, recBusy = false, recReq = 0;
+
+function recEsc(t) {
+  return String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function recFmt(iso) {
+  return new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
+}
+function recInit() {
+  const inp = document.getElementById("recDate");
+  const t = todayStr();
+  inp.max = t;
+  if (!inp.value) inp.value = t;
+  recReset();
+}
+function recDateChanged() {
+  const inp = document.getElementById("recDate");
+  if (!inp.value) inp.value = todayStr();
+  recReset();
+}
+function recSetState(msg, isErr) {
+  const st = document.getElementById("recState");
+  if (!msg) { st.classList.add("hidden"); st.innerHTML = ""; return; }
+  st.classList.remove("hidden");
+  st.innerHTML = msg;
+  st.style.color = isErr ? "var(--red)" : "var(--muted)";
+}
+async function recReset() {
+  recLoaded = 0; recTotalCount = 0;
+  document.getElementById("recSlider").innerHTML = "";
+  document.getElementById("recBody").innerHTML = "";
+  document.getElementById("recMoreBtn").classList.add("hidden");
+  document.getElementById("recCount").textContent = "…";
+  document.getElementById("recTotal").textContent = "…";
+  document.getElementById("recPos").textContent = "-";
+  const myReq = ++recReq;
+  recSetState('<span class="rec-spin"></span>Loading records…');
+  const dateStr = document.getElementById("recDate").value;
+  const { startISO, endISO } = dayRangeISO(dateStr);
+  try {
+    // Totals for the selected day (quantity column only).
+    const { data: qRows, error: qErr } = await sb.from("diesel_data").select("quantity")
+      .gte("entry_datetime", startISO).lt("entry_datetime", endISO);
+    if (qErr) throw qErr;
+    if (myReq !== recReq) return;
+    recTotalCount = (qRows || []).length;
+    const sum = (qRows || []).reduce((a, r) => a + Number(r.quantity || 0), 0);
+    document.getElementById("recCount").textContent = recTotalCount.toLocaleString();
+    document.getElementById("recTotal").textContent = (Math.round(sum * 100) / 100).toLocaleString();
+    if (recTotalCount === 0) { recSetState("No diesel dispensing records for this date."); recUpdatePos(); return; }
+    await recFetchPage(myReq);
+  } catch (err) {
+    if (myReq !== recReq) return;
+    document.getElementById("recCount").textContent = "-";
+    document.getElementById("recTotal").textContent = "-";
+    recSetState("Couldn't load records. Please try again.", true);
+    console.error("Failed to load dispensing records:", err);
+  }
+}
+async function recFetchPage(myReq) {
+  const dateStr = document.getElementById("recDate").value;
+  const { startISO, endISO } = dayRangeISO(dateStr);
+  const { data, error } = await sb.from("diesel_data")
+    .select("vehicle_name, quantity, entry_datetime, operator_name, operator_reading")
+    .gte("entry_datetime", startISO).lt("entry_datetime", endISO)
+    .order("entry_datetime", { ascending: false })
+    .range(recLoaded, recLoaded + REC_PAGE - 1);
+  if (error) throw error;
+  if (myReq !== recReq) return;
+  recSetState("");
+  recRender(data || []);
+}
+function recRender(rows) {
+  const slider = document.getElementById("recSlider");
+  const body = document.getElementById("recBody");
+  const oldMore = slider.querySelector(".rec-card.more");
+  if (oldMore) oldMore.remove();
+  rows.forEach(r => {
+    const veh = recEsc(r.vehicle_name || "-"), op = recEsc(r.operator_name || "-");
+    const orr = (r.operator_reading == null) ? '-' : Number(r.operator_reading).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const qty = Number(r.quantity || 0).toLocaleString(), when = recEsc(recFmt(r.entry_datetime));
+    slider.insertAdjacentHTML("beforeend",
+      '<div class="rec-card"><div class="rc-top"><div class="rc-veh">' + veh + '</div><div class="rc-qty">' + qty + ' L</div></div>' +
+      '<div class="rc-row">Operator Reading: <b>' + orr + '</b></div><div class="rc-row">Date &amp; Time: <b>' + when + '</b></div><div class="rc-row">Operator: <b>' + op + '</b></div></div>');
+    body.insertAdjacentHTML("beforeend",
+      '<tr><td>' + op + '</td><td>' + veh + '</td><td class="q">' + qty + '</td><td>' + orr + '</td><td>' + when + '</td></tr>');
+  });
+  recLoaded += rows.length;
+  const hasMore = recLoaded < recTotalCount && rows.length > 0;
+  const btn = document.getElementById("recMoreBtn");
+  btn.classList.toggle("hidden", !hasMore);
+  btn.disabled = false; btn.textContent = "Load More (" + (recTotalCount - recLoaded) + " left)";
+  if (hasMore) slider.insertAdjacentHTML("beforeend", '<div class="rec-card more"><button class="rec-more-btn" onclick="recLoadMore()">Load More ›</button></div>');
+  recUpdatePos();
+}
+async function recLoadMore() {
+  if (recBusy) return;
+  recBusy = true;
+  const btn = document.getElementById("recMoreBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="rec-spin"></span>Loading…';
+  try { await recFetchPage(recReq); }
+  catch (err) { btn.disabled = false; btn.textContent = "Retry Load More"; console.error(err); }
+  recBusy = false;
+}
+function recSlide(dir) {
+  const s = document.getElementById("recSlider");
+  const c = s.querySelector(".rec-card");
+  if (!c) return;
+  s.scrollBy({ left: dir * (c.offsetWidth + 10), behavior: "smooth" });
+}
+function recUpdatePos() {
+  const s = document.getElementById("recSlider");
+  const cards = s.querySelectorAll(".rec-card:not(.more)");
+  const pos = document.getElementById("recPos");
+  if (!cards.length) { pos.textContent = "-"; document.getElementById("recPrev").disabled = true; document.getElementById("recNext").disabled = true; return; }
+  const w = cards[0].offsetWidth + 10;
+  const idx = Math.min(cards.length, Math.round(s.scrollLeft / w) + 1);
+  pos.textContent = idx + " / " + recTotalCount;
+  document.getElementById("recPrev").disabled = s.scrollLeft <= 2;
+  document.getElementById("recNext").disabled = s.scrollLeft + s.clientWidth >= s.scrollWidth - 2;
 }
 
 /* ============ OIL TRACKER ============ */
